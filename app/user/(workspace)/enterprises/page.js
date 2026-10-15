@@ -4,8 +4,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-const API_URL = "http://localhost:3000/api/enterprises/search";
-
 export default function UserEnterprisesPage() {
     const [enterprises, setEnterprises] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -15,79 +13,79 @@ export default function UserEnterprisesPage() {
     useEffect(() => {
         const controller = new AbortController();
 
-       async function fetchEnterprises() {
-    try {
-        setLoading(true);
-        setError("");
+        async function fetchEnterprises() {
+            try {
+                setLoading(true);
+                setError("");
 
-        const storedUser = localStorage.getItem("shopsync_user");
+                const storedUser = localStorage.getItem("shopsync_user");
 
-        if (!storedUser) {
-            throw new Error(
-                "User details not found. Please sign in again."
-            );
-        }
+                if (!storedUser) {
+                    throw new Error(
+                        "User details not found. Please sign in again."
+                    );
+                }
 
-        const user = JSON.parse(storedUser);
+                const user = JSON.parse(storedUser);
 
-        const district = user?.location?.district;
-        const state = user?.location?.state;
+                const district = user?.location?.district;
+                const state = user?.location?.state;
 
-        if (!district || !state) {
-            throw new Error(
-                "Your district or state is missing from your profile."
-            );
-        }
+                if (!district || !state) {
+                    throw new Error(
+                        "Your district or state is missing from your profile."
+                    );
+                }
 
-        const token = localStorage.getItem("shopsync_user_token");
+                const token = localStorage.getItem("shopsync_user_token");
 
-        if (!token) {
-            throw new Error(
-                "Authentication token not found. Please sign in again."
-            );
-        }
+                if (!token) {
+                    throw new Error(
+                        "Authentication token not found. Please sign in again."
+                    );
+                }
 
-        const params = new URLSearchParams({
-            district,
-            state,
-        });
+                const params = new URLSearchParams({
+                    district,
+                    state,
+                });
 
-        const response = await fetch(
-            `${API_URL}?${params.toString()}`,
-            {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-                signal: controller.signal,
+                const response = await fetch(
+                    `/api/enterprises/search?${params.toString()}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                        signal: controller.signal,
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!response.ok || result.success === false) {
+                    throw new Error(
+                        result.message || "Unable to load enterprises."
+                    );
+                }
+
+                setEnterprises(
+                    Array.isArray(result.enterprises)
+                        ? result.enterprises
+                        : []
+                );
+            } catch (err) {
+                if (err.name !== "AbortError") {
+                    setError(
+                        err.message || "Unable to load businesses."
+                    );
+                }
+            } finally {
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
             }
-        );
-
-        const result = await response.json();
-
-        if (!response.ok || result.success === false) {
-            throw new Error(
-                result.message || "Unable to load enterprises."
-            );
         }
-
-        setEnterprises(
-            Array.isArray(result.enterprises)
-                ? result.enterprises
-                : []
-        );
-    } catch (err) {
-        if (err.name !== "AbortError") {
-            setError(
-                err.message || "Unable to load businesses."
-            );
-        }
-    } finally {
-        if (!controller.signal.aborted) {
-            setLoading(false);
-        }
-    }
-}
 
         fetchEnterprises();
 

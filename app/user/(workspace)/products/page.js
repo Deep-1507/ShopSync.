@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState, useMemo } from "react";
 
-const API_URL = "http://localhost:3000/api/products/allProducts/";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -43,8 +42,10 @@ export default function ProductsPage() {
         state,
       });
 
+
+
       const response = await fetch(
-        `${API_URL}?${params.toString()}`,
+        `/api/products/allProducts?${params.toString()}`,
         {
           method: "GET",
         }
@@ -142,11 +143,10 @@ export default function ProductsPage() {
       {(error || success) && (
         <div
           role="alert"
-          className={`rounded-xl border px-4 py-3 text-sm font-medium ${
-            error
+          className={`rounded-xl border px-4 py-3 text-sm font-medium ${error
               ? "border-red-200 bg-red-50 text-red-700"
               : "border-emerald-200 bg-emerald-50 text-emerald-700"
-          }`}
+            }`}
         >
           {error || success}
         </div>
@@ -386,7 +386,7 @@ export default function ProductsPage() {
             {/* Product image */}
             <div className="flex h-64 items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100 sm:h-80">
               {selectedProduct.photo_url ||
-              selectedProduct.imageUrl ? (
+                selectedProduct.imageUrl ? (
                 <img
                   src={
                     selectedProduct.photo_url ||
@@ -425,8 +425,8 @@ export default function ProductsPage() {
                 <p className="mt-4 text-2xl font-bold text-blue-600">
                   {selectedProduct.price != null
                     ? `₹${Number(
-                        selectedProduct.price
-                      ).toLocaleString("en-IN")}`
+                      selectedProduct.price
+                    ).toLocaleString("en-IN")}`
                     : "Price unavailable"}
                 </p>
               </div>
