@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import enterpriseAuthMiddleware from "../../../../middlewares/enterpriseAuthMiddleware";
+import {enterpriseAuthMiddleware} from "../../../../middlewares/enterpriseAuthMiddleware";
 import {
   createOrderControllerforEnterprise
 } from "../../../../controllers/orderController";

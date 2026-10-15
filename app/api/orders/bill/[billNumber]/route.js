@@ -1,12 +1,12 @@
-import authMiddleware from "../../../../../middlewares/authMiddleware";
-import enterpriseAuthMiddleware from "../../../../../middlewares/enterpriseAuthMiddleware";
+import {userAuthMiddleware} from "../../../../../middlewares/userAuthMiddleware";
+import {enterpriseAuthMiddleware} from "../../../../../middlewares/enterpriseAuthMiddleware";
 import { getOrderByBillController } from "../../../../../controllers/orderController";
 
 export async function GET(request, { params }) {
   const { billNumber } = await params;
 
   // Check customer token
-  const customerAuth = await authMiddleware(request);
+  const customerAuth = await userAuthMiddleware(request);
 
   if (!customerAuth?.response && customerAuth?.user?.userId) {
     return getOrderByBillController(billNumber, {

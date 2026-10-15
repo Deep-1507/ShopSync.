@@ -19,13 +19,13 @@ const money = (value) =>
 
   }).format(Number(value) || 0);
 
-const makeBillNumber = () =>
+// const makeBillNumber = () =>
 
-  `INV-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
+//   `INV-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
 
 const initialBill = () => ({
 
-  billNumber: makeBillNumber(),
+  // billNumber: makeBillNumber(),
 
   orderType: "Collect from store",
 
@@ -210,7 +210,7 @@ export default function CreateOrderPage() {
 
     const payload = {
 
-      billNumber: form.billNumber,
+      // billNumber: form.billNumber,
 
       orderType: form.orderType,
 
@@ -310,7 +310,7 @@ export default function CreateOrderPage() {
 
       });
 
-      setNotice(`Bill ${form.billNumber} created successfully.`);
+      setNotice("Bill created successfully.");
 
       setCart([]);
 
@@ -448,7 +448,7 @@ export default function CreateOrderPage() {
 
             <div><span className="mb-2 block text-[10px] font-extrabold tracking-[0.13em] text-blue-600">LIVE BILL</span><h2>Order summary</h2><p>Review selected items and totals.</p></div>
 
-            <span className="rounded-full bg-[#f4f7fc] px-3 py-1.5 font-mono text-[10px] text-[#526582]">{form.billNumber}</span>
+            {/* <span className="rounded-full bg-[#f4f7fc] px-3 py-1.5 font-mono text-[10px] text-[#526582]">{form.billNumber}</span> */}
 
           </div>
 
@@ -540,7 +540,7 @@ export default function CreateOrderPage() {
 
             <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
 
-              <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-blue-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal">Bill number<input name="billNumber" value={form.billNumber} onChange={updateForm} required /></label>
+              {/* <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-blue-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal">Bill number<input name="billNumber" value={form.billNumber} onChange={updateForm} required /></label> */}
 
               <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-blue-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal">Customer ID <span className="inline text-red-600">*</span><input name="customerId" value={form.customerId} onChange={updateForm} placeholder="MongoDB customer ObjectId" required /></label>
 

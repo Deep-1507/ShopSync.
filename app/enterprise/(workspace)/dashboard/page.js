@@ -29,6 +29,8 @@ export default function EnterpriseDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+ 
+
   useEffect(() => {
     const session = getEnterpriseSession();
     setEnterprise(session.enterprise);
@@ -41,8 +43,8 @@ export default function EnterpriseDashboard() {
 
         const orderPromise = enterpriseId
           ? enterpriseRequest(
-              `/api/orders/enterprise/${enterpriseId}`
-            )
+            `/api/orders/enterprise/${enterpriseId}`
+          )
           : Promise.resolve({ data: [] });
 
         const [productResult, orderResult] = await Promise.all([
@@ -62,64 +64,88 @@ export default function EnterpriseDashboard() {
     loadDashboard();
   }, []);
 
-  const stats = useMemo(() => {
-    const today = new Date();
-    const isToday = (value) => {
-      if (!value) return false;
-      const date = new Date(value);
-      return (
-        !Number.isNaN(date.getTime()) &&
-        date.getDate() === today.getDate() &&
-        date.getMonth() === today.getMonth() &&
-        date.getFullYear() === today.getFullYear()
-      );
-    };
 
-    const validOrders = orders.filter(
-      (order) => order.orderStatus !== "cancelled"
-    );
+const [todayDate, setTodayDate] = useState(null);
 
+useEffect(() => {
+  setTodayDate(new Date());
+}, []);
+
+const stats = useMemo(() => {
+  if (!todayDate) {
     return {
       products: products.length,
       orders: orders.length,
-      today: orders.filter((order) =>
-        isToday(order.createdAt || order.billDate)
-      ).length,
-      revenue: validOrders.reduce(
-        (total, order) => total + (Number(order.grandTotal) || 0),
-        0
-      ),
+      today: 0,
+      revenue: orders
+        .filter((order) => order.orderStatus !== "cancelled")
+        .reduce(
+          (total, order) => total + (Number(order.grandTotal) || 0),
+          0
+        ),
     };
-  }, [products, orders]);
+  }
 
-  const chart = useMemo(() => {
-    const now = new Date();
+  const isToday = (value) => {
+    if (!value) return false;
 
-    return Array.from({ length: 6 }, (_, index) => {
-      const start = new Date(now);
-      start.setDate(now.getDate() - (5 - index) * 5 - 4);
-      start.setHours(0, 0, 0, 0);
+    const date = new Date(value);
 
-      const end = new Date(start);
-      end.setDate(start.getDate() + 5);
+    return (
+      !Number.isNaN(date.getTime()) &&
+      date.getDate() === todayDate.getDate() &&
+      date.getMonth() === todayDate.getMonth() &&
+      date.getFullYear() === todayDate.getFullYear()
+    );
+  };
 
-      const count = orders.filter((order) => {
-        const date = new Date(order.createdAt || order.billDate);
-        return (
-          !Number.isNaN(date.getTime()) &&
-          date >= start &&
-          date < end
-        );
-      }).length;
+  const validOrders = orders.filter(
+    (order) => order.orderStatus !== "cancelled"
+  );
 
-      return {
-        label: `${start.getDate()}–${new Date(
-          end.getTime() - 86400000
-        ).getDate()}`,
-        count,
-      };
-    });
-  }, [orders]);
+  return {
+    products: products.length,
+    orders: orders.length,
+    today: orders.filter((order) =>
+      isToday(order.createdAt || order.billDate)
+    ).length,
+    revenue: validOrders.reduce(
+      (total, order) => total + (Number(order.grandTotal) || 0),
+      0
+    ),
+  };
+}, [products, orders, todayDate]);
+
+const chart = useMemo(() => {
+  if (!todayDate) return [];
+
+  return Array.from({ length: 6 }, (_, index) => {
+    const start = new Date(todayDate);
+
+    start.setDate(todayDate.getDate() - (5 - index) * 5 - 4);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 5);
+
+    const count = orders.filter((order) => {
+      const date = new Date(order.createdAt || order.billDate);
+
+      return (
+        !Number.isNaN(date.getTime()) &&
+        date >= start &&
+        date < end
+      );
+    }).length;
+
+    return {
+      label: `${start.getDate()}–${new Date(
+        end.getTime() - 86400000
+      ).getDate()}`,
+      count,
+    };
+  });
+}, [orders, todayDate]);
 
   const maxCount = Math.max(...chart.map((item) => item.count), 1);
 
@@ -333,8 +359,8 @@ export default function EnterpriseDashboard() {
                       <td>
                         {order.createdAt || order.billDate
                           ? new Date(
-                              order.createdAt || order.billDate
-                            ).toLocaleDateString("en-IN")
+                            order.createdAt || order.billDate
+                          ).toLocaleDateString("en-IN")
                           : "—"}
                       </td>
                       <td>

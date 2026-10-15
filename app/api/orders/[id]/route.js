@@ -1,6 +1,6 @@
 
-import authMiddleware from "../../../../middlewares/authMiddleware";
-import enterpriseAuthMiddleware from "../../../../middlewares/enterpriseAuthMiddleware";
+import {userAuthMiddleware} from "../../../../middlewares/userAuthMiddleware";
+import {enterpriseAuthMiddleware} from "../../../../middlewares/enterpriseAuthMiddleware";
 import {
   getOrderController,
   updateOrderController,
