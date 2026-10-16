@@ -1,38 +1,68 @@
 
 import { NextResponse } from "next/server";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { v2 as cloudinary } from "cloudinary";
 
-// export const runtime = "nodejs";
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 const ALLOWED_TYPES = {
-  "image/jpeg": ".jpg",
-  "image/png": ".png",
-  "image/webp": ".webp",
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
 };
+
+function uploadToCloudinary(buffer, publicId) {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream(
+      {
+        folder: "shopsync/products",
+        public_id: publicId,
+        resource_type: "image",
+        allowed_formats: ["jpg", "jpeg", "png", "webp"],
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        if (!result) {
+          reject(new Error("Cloudinary returned no upload result."));
+          return;
+        }
+
+        resolve(result);
+      }
+    ).end(buffer);
+  });
+}
 
 export async function POST(request) {
   try {
     // IMPORTANT:
-    // Protect this endpoint with the same enterprise-authentication
-    // middleware/check used by your existing product create/update APIs.
+    // Verify enterprise authentication here using the same
+    // server-side authentication logic as your product APIs.
 
     const formData = await request.formData();
     const file = formData.get("image");
 
     if (!file || typeof file.arrayBuffer !== "function") {
       return NextResponse.json(
-        { success: false, message: "Please select an image." },
+        {
+          success: false,
+          message: "Please select an image.",
+        },
         { status: 400 }
       );
     }
 
-    const extension = ALLOWED_TYPES[file.type];
-
-    if (!extension) {
+    if (!ALLOWED_TYPES[file.type]) {
       return NextResponse.json(
         {
           success: false,
@@ -52,40 +82,30 @@ export async function POST(request) {
       );
     }
 
-    const uploadDirectory = path.join(
-      process.cwd(),
-      "picture-uploads"
-    );
-
-    await mkdir(uploadDirectory, { recursive: true });
-
-    const filename = `${randomUUID()}${extension}`;
-    const filePath = path.join(uploadDirectory, filename);
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    await writeFile(filePath, buffer, { flag: "wx" });
+    // A fresh UUID gives each upload a unique Cloudinary public ID.
+    const publicId = randomUUID();
 
-    // Set NEXT_PUBLIC_APP_URL in production to your canonical public
-    // website origin, e.g. https://your-domain.com.
-    const origin =
-      process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
-
-    const photo_url =
-      `${origin}/api/product-images/${filename}`;
+    const result = await uploadToCloudinary(buffer, publicId);
 
     return NextResponse.json(
       {
         success: true,
         message: "Image uploaded successfully.",
-        photo_url,
+        photo_url: result.secure_url,
+        public_id: result.public_id,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Image upload error:", error);
+    console.error("Cloudinary image upload error:", error);
 
     return NextResponse.json(
-      { success: false, message: "Unable to upload image." },
+      {
+        success: false,
+        message: "Unable to upload image. Please try again.",
+      },
       { status: 500 }
     );
   }
