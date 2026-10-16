@@ -12,10 +12,26 @@ export async function registerProduct(body, enterpriseId) {
 
   const validatedData = productSchemaValidator.parse(body);
 
-  return Product.create({
+  console.log("Enterprise ID received:", enterpriseId);
+
+  const product = new Product({
     ...validatedData,
-    enterpriseId,
+    enterpriseId: enterpriseId,
   });
+
+  console.log("Enterprise ID before save:", product.enterpriseId);
+  console.log("Document before save:", product.toObject());
+
+  await product.save();
+
+  console.log("Saved product:", product.toObject());
+
+  // Read it back from MongoDB.
+  const savedProduct = await Product.findById(product._id).lean();
+
+  console.log("Product fetched from DB:", savedProduct);
+
+  return savedProduct;
 }
 
 

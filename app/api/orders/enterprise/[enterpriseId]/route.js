@@ -11,9 +11,9 @@ export async function GET(request, { params }) {
 
   if (
     !enterpriseAuth?.response &&
-    enterpriseAuth?.user?.enterpriseId
+    enterpriseAuth?.enterpriseId
   ) {
-    if (enterpriseAuth.user.enterpriseId !== enterpriseId) {
+    if (enterpriseAuth.enterpriseId !== enterpriseId) {
       return Response.json(
         { success: false, message: "Access denied" },
         { status: 403 }
@@ -28,23 +28,23 @@ export async function GET(request, { params }) {
   }
 
   // If enterprise authentication fails, check customer authentication
-  const customerAuth = await authMiddleware(request);
+  // const customerAuth = await userAuthMiddleware(request);
 
-  if (!customerAuth?.response && customerAuth?.user?.userId) {
-    return listOrdersController(
-      {
-        enterpriseId,
-        customerId: customerAuth.user.userId,
-      },
-      searchParams.get("page") || "1",
-      searchParams.get("limit") || "10"
-    );
-  }
+  // if (!customerAuth?.response && customerAuth?.user?.userId) {
+  //   return listOrdersController(
+  //     {
+  //       enterpriseId,
+  //       customerId: customerAuth.user.userId,
+  //     },
+  //     searchParams.get("page") || "1",
+  //     searchParams.get("limit") || "10"
+  //   );
+  // }
 
   // Both authentications failed
   return (
     enterpriseAuth?.response ||
-    customerAuth?.response ||
+    // customerAuth?.response ||
     Response.json(
       { success: false, message: "Unauthorized" },
       { status: 401 }

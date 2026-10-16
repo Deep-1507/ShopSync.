@@ -10,23 +10,14 @@ import {
 
 const emptyForm = {
   name: "",
-
   photo_url: "",
-
   sku: "",
-
   category: "",
-
   brand: "",
-
   price: "",
-
   stock: "0",
-
   unit: "piece",
-
   weight: "0",
-
   description: "",
 };
 
@@ -42,33 +33,22 @@ function money(value) {
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
-
   const [form, setForm] = useState(emptyForm);
-
   const [editingId, setEditingId] = useState(null);
-
   const [search, setSearch] = useState("");
-
   const [loading, setLoading] = useState(true);
-
   const [saving, setSaving] = useState(false);
-
   const [error, setError] = useState("");
-
   const [success, setSuccess] = useState("");
 
   const loadProducts = useCallback(async () => {
     setLoading(true);
-
     setError("");
-
     const id = localStorage.getItem(ENTERPRISE_ID);
-
     console.log("Reached here:", id);
 
     try {
       const result = await enterpriseRequest(`/api/products/allProducts/${id}`);
-
       setProducts(Array.isArray(result.data) ? result.data : []);
     } catch (err) {
       setError(err.message || "Unable to load products");
@@ -106,11 +86,8 @@ export default function ProductsPage() {
 
   function resetForm() {
     setForm(emptyForm);
-
     setEditingId(null);
-
     setError("");
-
     setSuccess("");
   }
 
@@ -119,47 +96,32 @@ export default function ProductsPage() {
 
     setForm({
       name: product.name || "",
-
       photo_url: product.photo_url || "",
-
       sku: product.sku || "",
-
       category: product.category || "",
-
       brand: product.brand || "",
-
       price: String(product.price ?? ""),
-
       stock: String(product.stock ?? 0),
-
       unit: product.unit || "piece",
-
       weight: String(product.weight ?? 0),
-
       description: product.description || "",
     });
 
     setError("");
-
     setSuccess("");
-
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function submitProduct(event) {
     event.preventDefault();
-
     setSaving(true);
-
     setError("");
-
     setSuccess("");
 
     const token = localStorage.getItem(TOKEN_KEY);
 
     if (!token) {
       setError("Authentication token not found. Please sign in again.");
-
       setSaving(false);
 
       return;
@@ -169,9 +131,7 @@ export default function ProductsPage() {
       ...form,
 
       price: Number(form.price),
-
       stock: Number(form.stock),
-
       weight: Number(form.weight),
     };
 
@@ -181,7 +141,6 @@ export default function ProductsPage() {
 
         {
           method: editingId ? "PATCH" : "POST",
-
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -197,7 +156,6 @@ export default function ProductsPage() {
       );
 
       setForm(emptyForm);
-
       setEditingId(null);
 
       await loadProducts();
@@ -219,12 +177,10 @@ export default function ProductsPage() {
 
     if (!token) {
       setError("Authentication token not found. Please sign in again.");
-
       return;
     }
 
     setError("");
-
     setSuccess("");
 
     try {
