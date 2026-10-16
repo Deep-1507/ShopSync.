@@ -412,6 +412,7 @@ export default function ProductsPage() {
       )}
 
       <div className="products-layout grid min-w-0 grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(340px,0.85fr)_minmax(0,1.15fr)]">
+
         <section className="panel product-form-panel min-w-0 overflow-hidden rounded-3xl border border-emerald-100 bg-white p-5 shadow-[0_10px_35px_rgba(16,80,48,0.06)] sm:p-7">
           <div className="panel-heading mb-6 flex items-start justify-between gap-4 border-b border-emerald-100 pb-5">
             <div>
@@ -441,7 +442,9 @@ export default function ProductsPage() {
             </div>
 
             <label className="field flex min-w-0 flex-col gap-2 text-sm font-semibold text-slate-700">
-              Product name <span>*</span>
+              <span>
+                Product name <span className="text-red-500">*</span>
+              </span>
               <input
                 className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                 name="name"
@@ -455,7 +458,9 @@ export default function ProductsPage() {
 
             <div className="field-row grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label className="field flex min-w-0 flex-col gap-2 text-sm font-semibold text-slate-700">
-                SKU <span>*</span>
+                <span>
+                  SKU <span className="text-red-500">*</span>
+                </span>
                 <input
                   className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                   name="sku"
@@ -467,7 +472,9 @@ export default function ProductsPage() {
               </label>
 
               <label className="field flex min-w-0 flex-col gap-2 text-sm font-semibold text-slate-700">
-                Category <span>*</span>
+                <span>
+                  Category <span className="text-red-500">*</span>
+                </span>
                 <input
                   className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                   name="category"
@@ -492,7 +499,9 @@ export default function ProductsPage() {
               </label>
 
               <label className="field flex min-w-0 flex-col gap-2 text-sm font-semibold text-slate-700">
-                Unit <span>*</span>
+                <span>
+                  Unit <span className="text-red-500">*</span>
+                </span>
                 <select
                   className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                   name="unit"
@@ -501,36 +510,26 @@ export default function ProductsPage() {
                   required
                 >
                   <option value="piece">Piece</option>
-
                   <option value="pack">Pack</option>
-
                   <option value="box">Box</option>
-
                   <option value="kg">Kilogram</option>
-
                   <option value="gram">Gram</option>
-
                   <option value="litre">Litre</option>
-
                   <option value="metre">Metre</option>
-
                   <option value="dozen">Dozen</option>
                 </select>
               </label>
             </div>
 
-
             <div className="flex flex-col gap-3">
               <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
                 Product image
-
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   onChange={handleImageSelection}
                   className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm"
                 />
-
                 <span className="text-xs font-normal text-slate-500">
                   Choose a JPEG, PNG, or WebP image. Maximum size: 5 MB.
                 </span>
@@ -568,7 +567,6 @@ export default function ProductsPage() {
               )}
             </div>
 
-
             {form.photo_url && (
               <div className="product-image-preview mt-3 flex max-h-56 items-center justify-center overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
                 <img
@@ -584,13 +582,15 @@ export default function ProductsPage() {
               </div>
             )}
 
-            <div className="form-section-label form-section-spaced border-b border-emerald-100 pb-2 text-xs font-extrabold tracking-[0.16em] text-emerald-800 mt-2">
+            <div className="form-section-label form-section-spaced mt-2 border-b border-emerald-100 pb-2 text-xs font-extrabold tracking-[0.16em] text-emerald-800">
               PRICING & INVENTORY
             </div>
 
             <div className="field-row grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label className="field flex min-w-0 flex-col gap-2 text-sm font-semibold text-slate-700">
-                Price (₹) <span>*</span>
+                <span>
+                  Price (₹) <span className="text-red-500">*</span>
+                </span>
                 <input
                   className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                   type="number"
@@ -605,7 +605,9 @@ export default function ProductsPage() {
               </label>
 
               <label className="field flex min-w-0 flex-col gap-2 text-sm font-semibold text-slate-700">
-                Stock quantity <span>*</span>
+                <span>
+                  Stock quantity <span className="text-red-500">*</span>
+                </span>
                 <input
                   className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                   type="number"
@@ -631,7 +633,6 @@ export default function ProductsPage() {
                   value={form.weight}
                   onChange={updateField}
                 />
-
                 <span>kg</span>
               </div>
             </label>
@@ -654,7 +655,7 @@ export default function ProductsPage() {
 
             <div className="form-actions flex flex-wrap items-center gap-3 pt-2">
               <button
-                className="primary-button form-submit inline-flex items-center justify-center gap-3 rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60 min-w-40"
+                className="primary-button form-submit inline-flex min-w-40 items-center justify-center gap-3 rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
                 type="submit"
                 disabled={saving}
               >
@@ -663,7 +664,6 @@ export default function ProductsPage() {
                   : editingId
                     ? "Save changes"
                     : "Create product"}
-
                 <span>→</span>
               </button>
 
@@ -684,6 +684,7 @@ export default function ProductsPage() {
             </p>
           </form>
         </section>
+
 
         <section className="panel product-list-panel min-w-0 overflow-hidden rounded-3xl border border-emerald-100 bg-white p-5 shadow-[0_10px_35px_rgba(16,80,48,0.06)] sm:p-7">
           <div className="panel-heading mb-6 flex items-start justify-between gap-4 border-b border-emerald-100 pb-5">
