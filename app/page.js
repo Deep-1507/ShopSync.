@@ -79,26 +79,32 @@ function PortalCard({ type, features, href }) {
 
   return (
     <article
-      className={`group relative flex flex-col overflow-hidden rounded-[2rem] border bg-white p-6 shadow-[0_12px_55px_rgba(30,64,175,0.07)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_25px_70px_rgba(37,99,235,0.16)] sm:p-8 ${
-        enterprise
-          ? "border-blue-200 hover:border-blue-400"
-          : "border-slate-200 hover:border-blue-300"
-      }`}
+      className={`group relative flex flex-col overflow-hidden rounded-[2rem] border bg-white p-6 shadow-[0_12px_55px_rgba(30,64,175,0.07)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_25px_70px_rgba(37,99,235,0.16)] sm:p-8 ${enterprise
+        ? "border-green-200 hover:border-green-400"
+        : "border-slate-200 hover:border-blue-300"
+        }`}
     >
-      <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-blue-100/70 blur-3xl transition-all duration-700 group-hover:bg-blue-200/80" />
+      <div className={`pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full blur-3xl transition-all duration-700 ${enterprise
+          ? "bg-emerald-100/70 group-hover:bg-emerald-200/80"
+          : "bg-blue-100/70 group-hover:bg-blue-200/80"
+        }`} />
 
       <div className="relative flex items-start justify-between gap-4">
         <div
-          className={`flex h-16 w-16 items-center justify-center rounded-2xl text-3xl text-white shadow-lg transition duration-500 group-hover:rotate-6 group-hover:scale-110 ${
-            enterprise
-              ? "bg-gradient-to-br from-green-400 to-green-700 shadow-green-200"
-              : "bg-gradient-to-br from-blue-400 to-blue-700 shadow-blue-200"
-          }`}
+          className={`flex h-16 w-16 items-center justify-center rounded-2xl text-3xl text-white shadow-lg transition duration-500 group-hover:rotate-6 group-hover:scale-110 ${enterprise
+            ? "bg-gradient-to-br from-green-400 to-green-700 shadow-green-200"
+            : "bg-gradient-to-br from-blue-400 to-blue-700 shadow-blue-200"
+            }`}
         >
           {enterprise ? "▤" : "♙"}
         </div>
 
-        <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-blue-700">
+        <span
+          className={`rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] ${enterprise
+            ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+            : "border-blue-100 bg-blue-50 text-blue-700"
+            }`}
+        >
           {enterprise ? "Business workspace" : "Shopping workspace"}
         </span>
       </div>
@@ -122,7 +128,12 @@ function PortalCard({ type, features, href }) {
             className="flex gap-3 transition-transform duration-300 group-hover:translate-x-1"
             style={{ transitionDelay: `${index * 40}ms` }}
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-xl text-blue-600 transition-colors group-hover:bg-blue-100">
+            <span
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xl transition-colors ${enterprise
+                ? "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100"
+                : "bg-blue-50 text-blue-600 group-hover:bg-blue-100"
+                }`}
+            >
               {feature.icon}
             </span>
             <div>
@@ -137,11 +148,10 @@ function PortalCard({ type, features, href }) {
 
       <Link
         href={href}
-        className={`relative mt-8 inline-flex items-center justify-center gap-3 rounded-2xl px-5 py-4 text-sm font-bold !text-white shadow-lg transition-all duration-300 hover:gap-5 focus:outline-none focus:ring-4 focus:ring-blue-200 ${
-          enterprise
-            ? "bg-green-600 shadow-green-200/70 hover:bg-green-700"
-            : "bg-blue-600 shadow-green-200 hover:bg-blue-700"
-        }`}
+        className={`relative mt-8 inline-flex items-center justify-center gap-3 rounded-2xl px-5 py-4 text-sm font-bold !text-white shadow-lg transition-all duration-300 hover:gap-5 focus:outline-none focus:ring-4 focus:ring-blue-200 ${enterprise
+          ? "bg-green-600 shadow-green-200/70 hover:bg-green-700"
+          : "bg-blue-600 shadow-green-200 hover:bg-blue-700"
+          }`}
       >
         {enterprise ? "Continue as Enterprise" : "Continue as User"}
         <span className="text-xl transition-transform group-hover:translate-x-1">→</span>
@@ -430,7 +440,7 @@ export default function HomePage() {
               >
                 Contact ShopSync <span>↗</span>
               </a>
-              
+
             </div>
 
             <div className="rounded-3xl border border-white/20 bg-white/10 p-6 backdrop-blur-md sm:p-7">
