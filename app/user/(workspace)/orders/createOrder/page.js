@@ -79,7 +79,7 @@ export default function CreateOrderPage() {
       const result = await enterpriseRequest(PRODUCT_ENDPOINT(enterpriseId));
       const payload = result?.data;
       setProducts(Array.isArray(payload) ? payload : Array.isArray(payload?.data) ? payload.data : []);
-    
+
       const userToken = localStorage.getItem("shopsync_user_token");
 
       const response = await fetch(ENTERPRISE_ENDPOINT(enterpriseId), {
@@ -332,18 +332,28 @@ export default function CreateOrderPage() {
 
 
   return (
-    <div className="page-stack">
-      <section className="page-heading">
+    <div className="flex w-full flex-col gap-6 bg-slate-50/70 p-4 sm:p-6 lg:p-8">
 
-        <div className="relative">
-          <span className="eyebrow">ORDERS</span>
-          <h1>Create Your Order</h1>
-          <p>
+
+      <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
+            ORDERS
+          </span>
+
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            Create Your Order
+          </h1>
+
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
             Select products, review your cart, and place your order in just a few simple steps.
           </p>
+        </div>
+      </section>
 
 
-
+      <section className="page-heading">
+        <div className="relative">
           <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center gap-4">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">

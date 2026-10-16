@@ -324,19 +324,21 @@ export default function EnterpriseProfilePage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <section className="flex flex-col gap-5 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-7">
+    <div className="flex w-full flex-col gap-6 bg-slate-50/70 p-4 sm:p-6 lg:p-8">
+
+      <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
         <div>
-          <span className="text-xs font-bold uppercase tracking-[0.18em] text-[#ed1c24]">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
             ACCOUNT SETTINGS
           </span>
 
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             User Profile
           </h1>
 
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
-            Review and manage the information associated with your account.
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+            Discover products from various stores, compare your
+            options, and find everything you need in one place.
           </p>
         </div>
 
@@ -350,6 +352,7 @@ export default function EnterpriseProfilePage() {
           Update Details
         </button>
       </section>
+
 
       {error && !showEditModal && (
         <div

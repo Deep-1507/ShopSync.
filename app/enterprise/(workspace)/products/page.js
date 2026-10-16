@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   ENTERPRISE_ID,
@@ -40,6 +46,13 @@ export default function ProductsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [cameraOpen, setCameraOpen] = useState(false);
+
+  const videoRef = useRef(null);
+  const cameraStreamRef = useRef(null);
 
   const loadProducts = useCallback(async () => {
     setLoading(true);
@@ -87,9 +100,124 @@ export default function ProductsPage() {
   function resetForm() {
     setForm(emptyForm);
     setEditingId(null);
+    setImageFile(null);
+    setImagePreview("");
     setError("");
     setSuccess("");
+    stopCamera();
   }
+
+  function handleImageSelection(event) {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError("Choose a JPEG, PNG, or WebP image.");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image size must not exceed 5 MB.");
+      event.target.value = "";
+      return;
+    }
+
+    setError("");
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  }
+
+  async function startCamera() {
+    try {
+      setError("");
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error(
+          "Camera access is unavailable. Use HTTPS or choose an image file."
+        );
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+        audio: false,
+      });
+
+      cameraStreamRef.current = stream;
+      setCameraOpen(true);
+    } catch (error) {
+      setError(
+        error.message || "Unable to access the camera. Check browser permissions."
+      );
+    }
+  }
+
+  useEffect(() => {
+    if (!cameraOpen || !videoRef.current || !cameraStreamRef.current) {
+      return;
+    }
+
+    videoRef.current.srcObject = cameraStreamRef.current;
+
+    videoRef.current.play().catch(() => {
+      setError("Unable to start the camera preview.");
+    });
+  }, [cameraOpen]);
+
+  function stopCamera() {
+    cameraStreamRef.current?.getTracks().forEach((track) => track.stop());
+    cameraStreamRef.current = null;
+    setCameraOpen(false);
+  }
+
+  function capturePhoto() {
+    const video = videoRef.current;
+
+    if (!video || !video.videoWidth || !video.videoHeight) {
+      setError("The camera is not ready yet. Please try again.");
+      return;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const context = canvas.getContext("2d");
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          setError("Unable to capture the image.");
+          return;
+        }
+
+        const file = new File(
+          [blob],
+          `product-${Date.now()}.jpg`,
+          { type: "image/jpeg" }
+        );
+
+        setImageFile(file);
+        setImagePreview(URL.createObjectURL(file));
+        setError("");
+        stopCamera();
+      },
+      "image/jpeg",
+      0.9
+    );
+  }
+
+
+  useEffect(() => {
+    return () => {
+      cameraStreamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
 
   function startEditing(product) {
     setEditingId(product._id);
@@ -109,11 +237,15 @@ export default function ProductsPage() {
 
     setError("");
     setSuccess("");
+    setImageFile(null);
+    setImagePreview("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+
   async function submitProduct(event) {
     event.preventDefault();
+
     setSaving(true);
     setError("");
     setSuccess("");
@@ -123,48 +255,76 @@ export default function ProductsPage() {
     if (!token) {
       setError("Authentication token not found. Please sign in again.");
       setSaving(false);
-
       return;
     }
 
-    const payload = {
-      ...form,
-
-      price: Number(form.price),
-      stock: Number(form.stock),
-      weight: Number(form.weight),
-    };
-
     try {
+      // Keep the existing image URL when editing without choosing a new image.
+      let photoUrl = form.photo_url || "";
+
+      // Step 1: Upload the selected/captured image, if there is one.
+      if (imageFile) {
+        const imageData = new FormData();
+        imageData.append("image", imageFile);
+
+        const uploadResponse = await fetch("/api/product-images", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: imageData,
+        });
+
+        const uploadResult = await uploadResponse.json();
+
+        if (!uploadResponse.ok) {
+          throw new Error(
+            uploadResult.message || "Unable to upload product image."
+          );
+        }
+
+        photoUrl = uploadResult.photo_url;
+      }
+
+      // Step 2: Submit the product with the returned image URL.
+      const payload = {
+        ...form,
+        photo_url: photoUrl,
+        price: Number(form.price),
+        stock: Number(form.stock),
+        weight: Number(form.weight),
+      };
+
       await enterpriseRequest(
         editingId ? `/api/products/${editingId}` : "/api/products",
-
         {
           method: editingId ? "PATCH" : "POST",
           headers: {
             Authorization: `Bearer ${token}`,
           },
-
           body: JSON.stringify(payload),
-        },
+        }
       );
 
       setSuccess(
         editingId
           ? "Product updated successfully."
-          : "Product created successfully.",
+          : "Product created successfully."
       );
 
       setForm(emptyForm);
+      setImageFile(null);
+      setImagePreview("");
       setEditingId(null);
 
       await loadProducts();
     } catch (err) {
-      setError(err.message || "Unable to save product");
+      setError(err.message || "Unable to save product.");
     } finally {
       setSaving(false);
     }
   }
+
 
   async function deleteProduct(product) {
     const confirmed = window.confirm(
@@ -203,18 +363,19 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="page-stack min-h-screen overflow-x-hidden bg-[#f4f8f3] px-4 py-6 text-slate-900 sm:px-6 lg:px-8">
-      <section className="page-heading mb-7 flex flex-col gap-5 rounded-3xl border border-emerald-100 bg-gradient-to-br from-white via-white to-emerald-50 p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-8">
-        <div>
-          <span className="eyebrow mb-2 inline-flex text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">
+    <div className="flex w-full flex-col gap-6 bg-slate-50/70 p-4 sm:p-6 lg:p-8">
+
+      <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="min-w-0">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-600">
             CATALOGUE MANAGEMENT
           </span>
 
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
+          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
             Products
           </h1>
 
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
+          <p className="mt-1 text-sm text-slate-500">
             Create products, maintain your inventory, and keep your catalogue up
             to date.
           </p>
@@ -236,6 +397,7 @@ export default function ProductsPage() {
           </span>
         </div>
       </section>
+
 
       {(error || success) && (
         <div
@@ -357,17 +519,55 @@ export default function ProductsPage() {
               </label>
             </div>
 
-            <label className="field flex min-w-0 flex-col gap-2 text-sm font-semibold text-slate-700">
-              Product image URL
-              <input
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-                type="url"
-                name="photo_url"
-                value={form.photo_url}
-                onChange={updateField}
-                placeholder="https://example.com/product.jpg"
-              />
-            </label>
+
+            <div className="flex flex-col gap-3">
+              <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                Product image
+
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleImageSelection}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm"
+                />
+
+                <span className="text-xs font-normal text-slate-500">
+                  Choose a JPEG, PNG, or WebP image. Maximum size: 5 MB.
+                </span>
+              </label>
+
+              <button
+                type="button"
+                onClick={startCamera}
+                className="inline-flex w-fit items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 font-semibold text-emerald-800 transition hover:bg-emerald-100"
+              >
+                Take a picture with camera
+              </button>
+
+              {(imagePreview || form.photo_url) && (
+                <div className="flex max-h-64 items-center justify-center overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
+                  <img
+                    src={imagePreview || form.photo_url}
+                    alt="Product preview"
+                    className="max-h-56 max-w-full rounded-xl object-contain"
+                  />
+                </div>
+              )}
+
+              {imageFile && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImageFile(null);
+                    setImagePreview("");
+                  }}
+                  className="w-fit text-sm font-semibold text-rose-700 hover:underline"
+                >
+                  Remove selected image
+                </button>
+              )}
+            </div>
+
 
             {form.photo_url && (
               <div className="product-image-preview mt-3 flex max-h-56 items-center justify-center overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
@@ -657,13 +857,12 @@ export default function ProductsPage() {
 
                       <td className="px-4 py-4 align-middle text-slate-700">
                         <span
-                          className={`stock-pill inline-flex min-w-10 justify-center rounded-full px-3 py-1 text-xs font-bold ${
-                            Number(product.stock) === 0
-                              ? "stock-empty bg-rose-100 text-rose-700"
-                              : Number(product.stock) < 10
-                                ? "stock-low bg-amber-100 text-amber-800"
-                                : "stock-available bg-emerald-100 text-emerald-800"
-                          }`}
+                          className={`stock-pill inline-flex min-w-10 justify-center rounded-full px-3 py-1 text-xs font-bold ${Number(product.stock) === 0
+                            ? "stock-empty bg-rose-100 text-rose-700"
+                            : Number(product.stock) < 10
+                              ? "stock-low bg-amber-100 text-amber-800"
+                              : "stock-available bg-emerald-100 text-emerald-800"
+                            }`}
                         >
                           {product.stock}
                         </span>
@@ -706,6 +905,55 @@ export default function ProductsPage() {
           </div>
         </section>
       </div>
+
+
+      {cameraOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-xl rounded-2xl bg-white p-5 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-xl font-bold text-slate-900">
+                Take product picture
+              </h2>
+
+              <button
+                type="button"
+                onClick={stopCamera}
+                className="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100"
+                aria-label="Close camera"
+              >
+                ✕
+              </button>
+            </div>
+
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="max-h-[60vh] w-full rounded-xl bg-black object-contain"
+            />
+
+            <div className="mt-4 flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                onClick={stopCamera}
+                className="rounded-xl border border-slate-200 px-4 py-3 font-semibold text-slate-700"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={capturePhoto}
+                className="rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white hover:bg-emerald-800"
+              >
+                Capture photo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

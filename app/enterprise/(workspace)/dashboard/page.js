@@ -150,7 +150,7 @@ export default function EnterpriseDashboard() {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-slate-500">
-          <div className="h-9 w-9 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
+          <div className="h-9 w-9 animate-spin rounded-full border-4 border-emerald-100 border-t-emerald-600" />
           <p className="text-sm font-medium">
             Loading your dashboard...
           </p>
@@ -166,7 +166,7 @@ export default function EnterpriseDashboard() {
       description: "Products in your catalogue",
       period: "ALL TIME",
       icon: "▦",
-      iconClass: "bg-blue-50 text-blue-700",
+      iconClass: "bg-emerald-50 text-emerald-700",
     },
     {
       label: "Total orders / bills",
@@ -203,11 +203,11 @@ export default function EnterpriseDashboard() {
     .slice(0, 5);
 
   return (
-    <div className="mx-auto w-full max-w-[1600px] space-y-5">
+    <div className="flex w-full flex-col gap-6 bg-slate-50/70 p-4 sm:p-6 lg:p-8">
       {/* Dashboard heading */}
       <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div className="min-w-0">
-          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-600">
             Your business at a glance
           </span>
 
@@ -223,7 +223,7 @@ export default function EnterpriseDashboard() {
 
         <Link
           href="/enterprise/products"
-          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 sm:self-center"
+          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 sm:self-center"
         >
           <span className="text-lg leading-none">＋</span>
           Add product
@@ -243,7 +243,7 @@ export default function EnterpriseDashboard() {
       {/* Active enterprise workspace */}
       <section className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-lg font-extrabold text-white">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-lg font-extrabold text-white">
             S
           </div>
 
@@ -258,7 +258,7 @@ export default function EnterpriseDashboard() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-          <span className="inline-flex rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
+          <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
             {enterprise?.category || "Enterprise"}
           </span>
 
@@ -308,7 +308,7 @@ export default function EnterpriseDashboard() {
         <article className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-600">
+              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-600">
                 Order activity
               </span>
               <h2 className="mt-1 text-base font-bold text-slate-900">
@@ -320,7 +320,7 @@ export default function EnterpriseDashboard() {
             </div>
 
             <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-500">
-              <span className="h-2.5 w-2.5 rounded-sm bg-blue-600" />
+              <span className="h-2.5 w-2.5 rounded-sm bg-emerald-600" />
               Orders
             </span>
           </div>
@@ -337,7 +337,7 @@ export default function EnterpriseDashboard() {
 
                 <div className="flex h-40 w-full max-w-10 items-end overflow-hidden rounded-t-md bg-slate-100">
                   <div
-                    className="w-full rounded-t-md bg-blue-600 transition-all duration-500"
+                    className="w-full rounded-t-md bg-emerald-600 transition-all duration-500"
                     style={{
                       height: `${Math.max(
                         item.count > 0 ? 8 : 0,
@@ -361,7 +361,7 @@ export default function EnterpriseDashboard() {
 
         <article className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-600">
+            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-600">
               Shortcuts
             </span>
             <h2 className="mt-1 text-base font-bold text-slate-900">
@@ -375,9 +375,9 @@ export default function EnterpriseDashboard() {
           <div className="mt-4 space-y-2">
             <Link
               href="/enterprise/products"
-              className="group flex min-w-0 items-center gap-3 rounded-xl border border-slate-100 p-3 transition hover:border-blue-100 hover:bg-blue-50/50"
+              className="group flex min-w-0 items-center gap-3 rounded-xl border border-slate-100 p-3 transition hover:border-emerald-100 hover:bg-emerald-50/50"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-lg font-bold text-blue-700">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-lg font-bold text-emerald-700">
                 ＋
               </span>
               <span className="min-w-0 flex-1">
@@ -388,14 +388,14 @@ export default function EnterpriseDashboard() {
                   Expand your product catalogue
                 </small>
               </span>
-              <span className="text-sm text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-blue-600">
+              <span className="text-sm text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-emerald-600">
                 ↗
               </span>
             </Link>
 
             <Link
               href="/enterprise/products"
-              className="group flex min-w-0 items-center gap-3 rounded-xl border border-slate-100 p-3 transition hover:border-blue-100 hover:bg-blue-50/50"
+              className="group flex min-w-0 items-center gap-3 rounded-xl border border-slate-100 p-3 transition hover:border-emerald-100 hover:bg-emerald-50/50"
             >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-lg font-bold text-violet-700">
                 ▤
@@ -408,14 +408,14 @@ export default function EnterpriseDashboard() {
                   Review prices and stock levels
                 </small>
               </span>
-              <span className="text-sm text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-blue-600">
+              <span className="text-sm text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-emerald-600">
                 ↗
               </span>
             </Link>
 
             <Link
               href="/enterprise/profile"
-              className="group flex min-w-0 items-center gap-3 rounded-xl border border-slate-100 p-3 transition hover:border-blue-100 hover:bg-blue-50/50"
+              className="group flex min-w-0 items-center gap-3 rounded-xl border border-slate-100 p-3 transition hover:border-emerald-100 hover:bg-emerald-50/50"
             >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-lg font-bold text-emerald-700">
                 ◉
@@ -428,7 +428,7 @@ export default function EnterpriseDashboard() {
                   Review your business details
                 </small>
               </span>
-              <span className="text-sm text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-blue-600">
+              <span className="text-sm text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-emerald-600">
                 ↗
               </span>
             </Link>
@@ -440,7 +440,7 @@ export default function EnterpriseDashboard() {
       <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-col justify-between gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:px-5">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-600">
+            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-600">
               Latest activity
             </span>
             <h2 className="mt-1 text-base font-bold text-slate-900">
@@ -502,7 +502,7 @@ export default function EnterpriseDashboard() {
                     </td>
 
                     <td className="whitespace-nowrap px-5 py-4">
-                      <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold capitalize text-blue-700">
+                      <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold capitalize text-emerald-700">
                         {order.orderStatus || "placed"}
                       </span>
                     </td>

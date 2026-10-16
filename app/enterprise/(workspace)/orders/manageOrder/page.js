@@ -426,26 +426,25 @@ export default function ManageOrdersPage() {
   }
 
   return (
-    <div className="page-stack">
+    <div className="flex w-full flex-col gap-6 bg-slate-50/70 p-4 sm:p-6 lg:p-8">
       {/* Page heading and actions */}
-      <section className="w-full">
-        <div className="flex w-full flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0">
-            <span className="text-xs font-bold uppercase tracking-widest text-blue-700">
-              ORDER MANAGEMENT
-            </span>
+ <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="min-w-0">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-600">
+            ORDER MANAGEMENT
+          </span>
 
-            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-gray-900">
-              Orders &amp; Bills
-            </h1>
+          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+           Orders &amp; Bills
+          </h1>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
-              Review enterprise orders, inspect invoices, and
+          <p className="mt-1 text-sm text-slate-500">
+            Review enterprise orders, inspect invoices, and
               print individual or filtered bills.
-            </p>
-          </div>
+          </p>
+        </div>
 
-          <div className="flex w-full shrink-0 flex-wrap items-center justify-start gap-3 sm:ml-auto sm:w-auto sm:justify-end">
+        <div className="flex w-full shrink-0 flex-wrap items-center justify-start gap-3 sm:ml-auto sm:w-auto sm:justify-end">
             <button
               type="button"
               onClick={() => loadOrders(currentPage)}
@@ -459,13 +458,16 @@ export default function ManageOrdersPage() {
               type="button"
               onClick={printAll}
               disabled={!filteredOrders.length}
-              className="rounded-lg bg-blue-600 px-2 py-1 text-xs font-extrabold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-emerald-600 px-2 py-1 text-xs font-extrabold text-white transition-colors hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               ▤ Print filtered bills
             </button>
           </div>
-        </div>
+
+       
       </section>
+
+
 
       {/* Error message */}
       {error && (
@@ -511,7 +513,7 @@ export default function ManageOrdersPage() {
       <section className="min-w-0 overflow-hidden rounded-2xl border border-[#e5ece7] bg-white shadow-sm">
         <div className="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center sm:p-5 [&_h2]:text-lg [&_h2]:font-bold [&_p]:mt-2 [&_p]:text-xs [&_p]:text-[#738078]">
           <div>
-            <span className="mb-2 block text-[10px] font-extrabold tracking-[0.13em] text-blue-600">
+            <span className="mb-2 block text-[10px] font-extrabold tracking-[0.13em] text-emerald-600">
               ORDER REGISTER
             </span>
 
@@ -523,7 +525,7 @@ export default function ManageOrdersPage() {
             </p>
           </div>
 
-          <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-blue-600">
+          <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600">
             {pagination.total} total bills
           </span>
         </div>
@@ -859,7 +861,7 @@ export default function ManageOrdersPage() {
 
               <button
                 type="button"
-                className="rounded-lg bg-blue-600 px-4 py-3 text-xs font-extrabold text-white hover:bg-blue-800"
+                className="rounded-lg bg-emerald-600 px-4 py-3 text-xs font-extrabold text-white hover:bg-emerald-800"
                 onClick={() => printOrder(selectedOrder)}
               >
                 ⎙ Print bill
@@ -1067,7 +1069,7 @@ export default function ManageOrdersPage() {
 
               <button
                 type="button"
-                className="rounded-lg bg-blue-600 px-4 py-3 text-xs font-extrabold text-white hover:bg-blue-800"
+                className="rounded-lg bg-emerald-600 px-4 py-3 text-xs font-extrabold text-white hover:bg-emerald-800"
                 onClick={() => printOrder(selectedOrder)}
               >
                 ⎙ Print bill

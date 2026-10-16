@@ -91,8 +91,8 @@ function PortalCard({ type, features, href }) {
         <div
           className={`flex h-16 w-16 items-center justify-center rounded-2xl text-3xl text-white shadow-lg transition duration-500 group-hover:rotate-6 group-hover:scale-110 ${
             enterprise
-              ? "bg-gradient-to-br from-blue-400 to-blue-700 shadow-blue-200"
-              : "bg-gradient-to-br from-sky-400 to-blue-600 shadow-sky-200"
+              ? "bg-gradient-to-br from-green-400 to-green-700 shadow-green-200"
+              : "bg-gradient-to-br from-blue-400 to-blue-700 shadow-blue-200"
           }`}
         >
           {enterprise ? "▤" : "♙"}
@@ -139,8 +139,8 @@ function PortalCard({ type, features, href }) {
         href={href}
         className={`relative mt-8 inline-flex items-center justify-center gap-3 rounded-2xl px-5 py-4 text-sm font-bold !text-white shadow-lg transition-all duration-300 hover:gap-5 focus:outline-none focus:ring-4 focus:ring-blue-200 ${
           enterprise
-            ? "bg-blue-600 shadow-blue-200/70 hover:bg-blue-700"
-            : "bg-slate-950 shadow-slate-200 hover:bg-blue-700"
+            ? "bg-green-600 shadow-green-200/70 hover:bg-green-700"
+            : "bg-blue-600 shadow-green-200 hover:bg-blue-700"
         }`}
       >
         {enterprise ? "Continue as Enterprise" : "Continue as User"}

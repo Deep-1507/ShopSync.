@@ -23,9 +23,9 @@ const money = (value) =>
 const dateText = (value) =>
     value
         ? new Date(value).toLocaleString("en-IN", {
-              dateStyle: "medium",
-              timeStyle: "short",
-          })
+            dateStyle: "medium",
+            timeStyle: "short",
+        })
         : "—";
 
 const dateInputText = (value) => {
@@ -375,44 +375,47 @@ export default function ManageOrdersPage() {
     }
 
     return (
-        <div className="page-stack">
-            <section className="w-full">
-                <div className="flex w-full flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0">
-                        <span className="eyebrow">ORDER HISTORY</span>
+        <div className="flex w-full flex-col gap-6 bg-slate-50/70 p-4 sm:p-6 lg:p-8">
 
-                        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-gray-900">
-                            Orders &amp; Bills
-                        </h1>
+            <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+                <div>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
+                        ORDER HISTORY
+                    </span>
 
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
-                            Track your orders, review order details, check
-                            invoices, and view or print your bills—all in
-                            one place.
-                        </p>
-                    </div>
+                    <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                        Orders &amp; Bills
+                    </h1>
 
-                    <div className="flex w-full shrink-0 flex-wrap items-center justify-start gap-3 sm:ml-auto sm:w-auto sm:justify-end">
-                        <button
-                            type="button"
-                            onClick={() => loadOrders(currentPage)}
-                            disabled={loading}
-                            className="rounded-lg border border-[#dfe8e2] bg-white px-2 py-1 !text-sm font-bold text-[#44564a] transition-colors hover:bg-[#f5f9f6] disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            ↻ Refresh
-                        </button>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                        Track your orders, review order details, check
+                        invoices, and view or print your bills—all in
+                        one place.
+                    </p>
+                </div>
 
-                        <button
-                            type="button"
-                            onClick={printAll}
-                            disabled={!filteredOrders.length}
-                            className="rounded-lg bg-blue-600 px-2 py-1 !text-sm font-extrabold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            ▤ Print filtered bills
-                        </button>
-                    </div>
+                <div className="flex w-full shrink-0 flex-wrap items-center justify-start gap-3 sm:ml-auto sm:w-auto sm:justify-end">
+                    <button
+                        type="button"
+                        onClick={() => loadOrders(currentPage)}
+                        disabled={loading}
+                        className="rounded-lg border border-[#dfe8e2] bg-white px-2 py-1 !text-sm font-bold text-[#44564a] transition-colors hover:bg-[#f5f9f6] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        ↻ Refresh
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={printAll}
+                        disabled={!filteredOrders.length}
+                        className="rounded-lg bg-blue-600 px-2 py-1 !text-sm font-extrabold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        ▤ Print filtered bills
+                    </button>
                 </div>
             </section>
+
+
 
             {error && (
                 <div
@@ -580,7 +583,7 @@ export default function ManageOrdersPage() {
                                             <small>
                                                 {dateText(
                                                     order.billDate ||
-                                                        order.createdAt
+                                                    order.createdAt
                                                 )}
                                             </small>
                                         </td>
@@ -595,7 +598,7 @@ export default function ManageOrdersPage() {
                                             <small>
                                                 {order.enterpriseId?._id ||
                                                     (typeof order.enterpriseId ===
-                                                    "string"
+                                                        "string"
                                                         ? order.enterpriseId
                                                         : "—")}
                                             </small>
@@ -635,7 +638,7 @@ export default function ManageOrdersPage() {
                                             >
                                                 {String(
                                                     order.paymentStatus ||
-                                                        "pending"
+                                                    "pending"
                                                 ).replaceAll("_", " ")}
                                             </span>
                                         </td>
@@ -690,8 +693,8 @@ export default function ManageOrdersPage() {
                             {pagination.total === 0
                                 ? 0
                                 : (pagination.page - 1) *
-                                      pagination.limit +
-                                  1}{" "}
+                                pagination.limit +
+                                1}{" "}
                             to{" "}
                             {Math.min(
                                 pagination.page * pagination.limit,
@@ -809,7 +812,7 @@ export default function ManageOrdersPage() {
                                     Created{" "}
                                     {dateText(
                                         selectedOrder.billDate ||
-                                            selectedOrder.createdAt
+                                        selectedOrder.createdAt
                                     )}
                                 </p>
                             </div>
@@ -830,7 +833,7 @@ export default function ManageOrdersPage() {
                                     {selectedOrder.customerId?.name ||
                                         selectedOrder.customerName ||
                                         (typeof selectedOrder.customerId ===
-                                        "string"
+                                            "string"
                                             ? selectedOrder.customerId
                                             : "—")}
                                     <br />
@@ -844,7 +847,7 @@ export default function ManageOrdersPage() {
                                     {selectedOrder.enterpriseId ||
                                         selectedOrder.customerName ||
                                         (typeof selectedOrder.customerId ===
-                                        "string"
+                                            "string"
                                             ? selectedOrder.customerId
                                             : "—")}
                                 </strong>
@@ -931,7 +934,7 @@ export default function ManageOrdersPage() {
                                                             item.name ||
                                                             String(
                                                                 item.productId ||
-                                                                    "Product"
+                                                                "Product"
                                                             )}
                                                     </strong>
                                                     <small>
@@ -973,7 +976,7 @@ export default function ManageOrdersPage() {
                                                     <strong>
                                                         {String(
                                                             payment.method ||
-                                                                "other"
+                                                            "other"
                                                         ).replaceAll("_", " ")}
                                                     </strong>
                                                     <small>

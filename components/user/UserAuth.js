@@ -24,12 +24,12 @@ const initialSignup = {
 };
 
 const inputClass =
-  "mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10";
+  "mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
 
 const labelClass = "block text-sm font-semibold text-slate-700";
 
 const buttonClass =
-  "flex w-full items-center justify-center gap-3 rounded-xl bg-emerald-600 px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60";
+  "flex w-full items-center justify-center gap-3 rounded-xl bg-blue-600 px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60";
 
 const secondaryButtonClass =
   "flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-60";
@@ -261,12 +261,12 @@ export default function UserAuth() {
       {/* Background decoration */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-40 top-20 h-96 w-96 rounded-full bg-emerald-200/40 blur-3xl"
+        className="pointer-events-none absolute -left-40 top-20 h-96 w-96 rounded-full bg-blue-200/40 blur-3xl"
       />
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-32 bottom-10 h-96 w-96 rounded-full bg-emerald-200/40 blur-3xl"
+        className="pointer-events-none absolute -right-32 bottom-10 h-96 w-96 rounded-full bg-blue-200/40 blur-3xl"
       />
 
       {/* Navbar */}
@@ -275,11 +275,11 @@ export default function UserAuth() {
           href="/"
           className="inline-flex items-center gap-2 text-2xl font-extrabold tracking-tight text-slate-900"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-lg text-white shadow-lg shadow-emerald-600/20">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-lg text-white shadow-lg shadow-blue-600/20">
             S
           </span>
           ShopSync
-          <span className="text-emerald-600">.</span>
+          <span className="text-blue-600">.</span>
         </a>
 
         <span className="hidden rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-xs font-semibold text-slate-500 shadow-sm sm:inline-flex">
@@ -291,15 +291,15 @@ export default function UserAuth() {
       <section className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-10 px-5 py-8 sm:px-8 md:py-12 lg:grid-cols-2 lg:gap-16 lg:px-12 lg:py-16">
         {/* Left section */}
         <div className="mx-auto w-full max-w-xl lg:mx-0">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold tracking-[0.16em] text-emerald-700">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-bold tracking-[0.16em] text-blue-700">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-blue-500" />
             YOUR SHOPPING, SIMPLIFIED
           </div>
 
           <h1 className="text-4xl font-black leading-[1.12] tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
             Everything you need.
             <br />
-            <span className="text-emerald-600">
+            <span className="text-blue-600">
               All in one place.
             </span>
           </h1>
@@ -333,9 +333,9 @@ export default function UserAuth() {
             ].map((feature) => (
               <div
                 key={feature.title}
-                className="group flex items-start gap-4 rounded-2xl border border-transparent p-4 transition hover:border-emerald-100 hover:bg-white/80 hover:shadow-sm"
+                className="group flex items-start gap-4 rounded-2xl border border-transparent p-4 transition hover:border-blue-100 hover:bg-white/80 hover:shadow-sm"
               >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-xl font-bold text-emerald-700 transition group-hover:bg-emerald-600 group-hover:text-white">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-xl font-bold text-blue-700 transition group-hover:bg-blue-600 group-hover:text-white">
                   {feature.icon}
                 </div>
 
@@ -357,7 +357,7 @@ export default function UserAuth() {
           <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-2xl shadow-slate-200/70 backdrop-blur-xl sm:p-8 lg:p-10">
             {/* Card heading */}
             <div className="mb-7">
-              <span className="text-xs font-extrabold tracking-[0.2em] text-emerald-600">
+              <span className="text-xs font-extrabold tracking-[0.2em] text-blue-600">
                 USER ACCOUNT
               </span>
 
@@ -389,7 +389,7 @@ export default function UserAuth() {
                 onClick={() => changeMode("signin")}
                 className={`relative z-10 rounded-lg px-4 py-3 text-sm font-bold transition ${
                   mode === "signin"
-                    ? "text-emerald-700"
+                    ? "text-blue-700"
                     : "text-slate-500 hover:text-slate-800"
                 }`}
               >
@@ -401,7 +401,7 @@ export default function UserAuth() {
                 onClick={() => changeMode("signup")}
                 className={`relative z-10 rounded-lg px-4 py-3 text-sm font-bold transition ${
                   mode === "signup"
-                    ? "text-emerald-700"
+                    ? "text-blue-700"
                     : "text-slate-500 hover:text-slate-800"
                 }`}
               >
@@ -477,7 +477,7 @@ export default function UserAuth() {
                   <button
                     type="button"
                     onClick={() => changeMode("signup")}
-                    className="font-bold text-emerald-700 underline-offset-4 hover:underline"
+                    className="font-bold text-blue-700 underline-offset-4 hover:underline"
                   >
                     Create an account
                   </button>
@@ -492,7 +492,7 @@ export default function UserAuth() {
                 <div className="mb-6">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">
+                      <p className="text-xs font-bold uppercase tracking-wider text-blue-700">
                         Step {signupStep} of 3
                       </p>
 
@@ -511,9 +511,9 @@ export default function UserAuth() {
                           key={step.number}
                           className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
                             signupStep === step.number
-                              ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                              ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
                               : signupStep > step.number
-                                ? "bg-emerald-100 text-emerald-700"
+                                ? "bg-blue-100 text-blue-700"
                                 : "bg-slate-100 text-slate-400"
                           }`}
                         >
@@ -527,7 +527,7 @@ export default function UserAuth() {
 
                   <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
                     <div
-                      className="h-full rounded-full bg-emerald-600 transition-all duration-500 ease-out"
+                      className="h-full rounded-full bg-blue-600 transition-all duration-500 ease-out"
                       style={{
                         width: `${(signupStep / 3) * 100}%`,
                       }}
@@ -759,8 +759,8 @@ export default function UserAuth() {
                           </div>
                         </div>
 
-                        <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
-                          <p className="text-xs leading-5 text-emerald-800">
+                        <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+                          <p className="text-xs leading-5 text-blue-800">
                             Your device coordinates will be detected
                             automatically when you create your account.
                             Your browser may ask for location permission.
@@ -781,7 +781,7 @@ export default function UserAuth() {
                             <button
                               type="button"
                               onClick={() => setSignupStep(1)}
-                              className="text-xs font-bold text-emerald-700 hover:underline"
+                              className="text-xs font-bold text-blue-700 hover:underline"
                             >
                               Edit
                             </button>
@@ -826,7 +826,7 @@ export default function UserAuth() {
                             <button
                               type="button"
                               onClick={() => setSignupStep(2)}
-                              className="text-xs font-bold text-emerald-700 hover:underline"
+                              className="text-xs font-bold text-blue-700 hover:underline"
                             >
                               Edit
                             </button>
@@ -872,11 +872,11 @@ export default function UserAuth() {
                           </dl>
                         </div>
 
-                        <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
-                          <p className="text-sm font-bold text-emerald-900">
+                        <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+                          <p className="text-sm font-bold text-blue-900">
                             Ready to get started?
                           </p>
-                          <p className="mt-1 text-xs leading-5 text-emerald-800">
+                          <p className="mt-1 text-xs leading-5 text-blue-800">
                             Select Create account to register. Your browser
                             will request permission to detect your device
                             coordinates.
@@ -933,7 +933,7 @@ export default function UserAuth() {
                   <button
                     type="button"
                     onClick={() => changeMode("signin")}
-                    className="font-bold text-emerald-700 underline-offset-4 hover:underline"
+                    className="font-bold text-blue-700 underline-offset-4 hover:underline"
                   >
                     Sign in
                   </button>

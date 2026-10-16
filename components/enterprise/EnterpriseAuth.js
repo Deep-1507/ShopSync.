@@ -28,12 +28,12 @@ const initialSignup = {
 };
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
+  "mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10";
 
 const labelClass = "block text-sm font-semibold text-slate-700";
 
 const primaryButtonClass =
-  "flex w-full items-center justify-center gap-3 rounded-xl bg-blue-600 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60";
+  "flex w-full items-center justify-center gap-3 rounded-xl bg-emerald-600 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60";
 
 const secondaryButtonClass =
   "flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-200";
@@ -284,7 +284,7 @@ export default function EnterpriseAuth() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-slate-50 px-4 py-6 text-slate-900 sm:px-6 lg:px-10">
       {/* Background decoration */}
-      <div className="pointer-events-none absolute -left-40 top-20 h-96 w-96 rounded-full bg-blue-200/30 blur-3xl" />
+      <div className="pointer-events-none absolute -left-40 top-20 h-96 w-96 rounded-full bg-emerald-200/30 blur-3xl" />
       <div className="pointer-events-none absolute -right-32 bottom-0 h-[28rem] w-[28rem] rounded-full bg-sky-200/30 blur-3xl" />
 
       {/* Top navigation */}
@@ -293,10 +293,10 @@ export default function EnterpriseAuth() {
           href="/enterprise/auth"
           className="flex items-center gap-1 text-xl font-extrabold tracking-tight text-slate-900"
         >
-          <span className="mr-2 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-lg font-black text-white shadow-lg shadow-blue-600/20">
+          <span className="mr-2 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-lg font-black text-white shadow-lg shadow-emerald-600/20">
             S
           </span>
-          ShopSync<span className="text-blue-600">.</span>
+          ShopSync<span className="text-emerald-600">.</span>
         </a>
 
         <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-600 sm:px-4 sm:text-sm">
@@ -307,8 +307,8 @@ export default function EnterpriseAuth() {
       <section className="relative mx-auto grid w-full max-w-7xl items-center gap-10 py-10 sm:py-14 lg:min-h-[calc(100vh-100px)] lg:grid-cols-[0.95fr_1.05fr] lg:gap-16 lg:py-12">
         {/* Introduction */}
         <div className="mx-auto w-full max-w-xl lg:mx-0">
-          <span className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3.5 py-2 text-[10px] font-extrabold tracking-[0.16em] text-blue-700 sm:text-xs">
-            <span className="h-2 w-2 rounded-full bg-blue-600" />
+          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3.5 py-2 text-[10px] font-extrabold tracking-[0.16em] text-emerald-700 sm:text-xs">
+            <span className="h-2 w-2 rounded-full bg-emerald-600" />
             YOUR BUSINESS, IN SYNC
           </span>
 
@@ -317,7 +317,7 @@ export default function EnterpriseAuth() {
             <br />
             business needs.
             <br />
-            <span className="text-blue-600">One workspace.</span>
+            <span className="text-emerald-600">One workspace.</span>
           </h1>
 
           <p className="mt-6 max-w-lg text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
@@ -327,7 +327,7 @@ export default function EnterpriseAuth() {
 
           <div className="mt-9 space-y-5">
             <div className="flex items-start gap-4">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-white text-lg font-bold text-blue-600 shadow-sm">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-emerald-100 bg-white text-lg font-bold text-emerald-600 shadow-sm">
                 ↗
               </span>
 
@@ -342,7 +342,7 @@ export default function EnterpriseAuth() {
             </div>
 
             <div className="flex items-start gap-4">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-white text-lg font-bold text-blue-600 shadow-sm">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-emerald-100 bg-white text-lg font-bold text-emerald-600 shadow-sm">
                 ▦
               </span>
 
@@ -357,7 +357,7 @@ export default function EnterpriseAuth() {
             </div>
 
             <div className="flex items-start gap-4">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-white text-lg font-bold text-blue-600 shadow-sm">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-emerald-100 bg-white text-lg font-bold text-emerald-600 shadow-sm">
                 ✓
               </span>
 
@@ -377,7 +377,7 @@ export default function EnterpriseAuth() {
         <div className="mx-auto w-full max-w-2xl rounded-3xl border border-slate-200/80 bg-white p-5 shadow-2xl shadow-slate-900/[0.06] sm:p-8 lg:p-9">
           {/* This header remains in place while signup steps change */}
           <div>
-            <span className="text-[10px] font-extrabold tracking-[0.18em] text-blue-600 sm:text-xs">
+            <span className="text-[10px] font-extrabold tracking-[0.18em] text-emerald-600 sm:text-xs">
               ENTERPRISE ACCOUNT
             </span>
 
@@ -398,7 +398,7 @@ export default function EnterpriseAuth() {
               type="button"
               className={`rounded-lg px-4 py-3 text-sm font-bold transition ${
                 mode === "signin"
-                  ? "bg-white text-blue-700 shadow-sm"
+                  ? "bg-white text-emerald-700 shadow-sm"
                   : "text-slate-500 hover:text-slate-900"
               }`}
               onClick={() => changeMode("signin")}
@@ -410,7 +410,7 @@ export default function EnterpriseAuth() {
               type="button"
               className={`rounded-lg px-4 py-3 text-sm font-bold transition ${
                 mode === "signup"
-                  ? "bg-white text-blue-700 shadow-sm"
+                  ? "bg-white text-emerald-700 shadow-sm"
                   : "text-slate-500 hover:text-slate-900"
               }`}
               onClick={() => changeMode("signup")}
@@ -481,7 +481,7 @@ export default function EnterpriseAuth() {
                 New to ShopSync?{" "}
                 <button
                   type="button"
-                  className="font-bold text-blue-600 transition hover:text-blue-700"
+                  className="font-bold text-emerald-600 transition hover:text-emerald-700"
                   onClick={() => changeMode("signup")}
                 >
                   Create an account
@@ -497,7 +497,7 @@ export default function EnterpriseAuth() {
               <div className="mb-6">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-blue-600">
+                    <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">
                       Step {signupStep} of 3
                     </p>
 
@@ -516,9 +516,9 @@ export default function EnterpriseAuth() {
                         key={step.number}
                         className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
                           signupStep === step.number
-                            ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                            ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
                             : signupStep > step.number
-                              ? "bg-blue-100 text-blue-700"
+                              ? "bg-emerald-100 text-emerald-700"
                               : "bg-slate-100 text-slate-400"
                         }`}
                       >
@@ -530,7 +530,7 @@ export default function EnterpriseAuth() {
 
                 <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
                   <div
-                    className="h-full rounded-full bg-blue-600 transition-all duration-500 ease-out"
+                    className="h-full rounded-full bg-emerald-600 transition-all duration-500 ease-out"
                     style={{ width: `${(signupStep / 3) * 100}%` }}
                   />
                 </div>
@@ -783,7 +783,7 @@ export default function EnterpriseAuth() {
                           </label>
                         </div>
 
-                        <p className="mt-4 rounded-xl border border-blue-100 bg-blue-50 px-3.5 py-3 text-xs leading-5 text-blue-800">
+                        <p className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 px-3.5 py-3 text-xs leading-5 text-emerald-800">
                           Your device coordinates will be detected
                           automatically when you create your account. Your
                           browser may ask for location permission.
@@ -814,13 +814,13 @@ export default function EnterpriseAuth() {
                                 key={paymentType}
                                 className={`flex cursor-pointer items-center gap-2.5 rounded-xl border px-3 py-3 text-sm font-semibold transition ${
                                   checked
-                                    ? "border-blue-200 bg-blue-50 text-blue-700"
+                                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                                     : "border-slate-200 text-slate-600 hover:bg-slate-50"
                                 }`}
                               >
                                 <input
                                   type="checkbox"
-                                  className="h-4 w-4 accent-blue-600"
+                                  className="h-4 w-4 accent-emerald-600"
                                   checked={checked}
                                   onChange={(event) =>
                                     togglePaymentType(
@@ -849,7 +849,7 @@ export default function EnterpriseAuth() {
                         <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
                           <input
                             type="checkbox"
-                            className="mt-1 h-4 w-4 shrink-0 accent-blue-600"
+                            className="mt-1 h-4 w-4 shrink-0 accent-emerald-600"
                             checked={signup.isAcceptingOnlineOrders}
                             onChange={(event) =>
                               updateSignupField(
@@ -871,11 +871,11 @@ export default function EnterpriseAuth() {
                         </label>
                       </div>
 
-                      <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
-                        <p className="text-sm font-bold text-blue-900">
+                      <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
+                        <p className="text-sm font-bold text-emerald-900">
                           Almost there!
                         </p>
-                        <p className="mt-1 text-xs leading-5 text-blue-800">
+                        <p className="mt-1 text-xs leading-5 text-emerald-800">
                           Review your details, then create your account.
                           Your browser will request permission to detect your
                           device coordinates.
@@ -927,7 +927,7 @@ export default function EnterpriseAuth() {
                 Already have an account?{" "}
                 <button
                   type="button"
-                  className="font-bold text-blue-600 transition hover:text-blue-700"
+                  className="font-bold text-emerald-600 transition hover:text-emerald-700"
                   onClick={() => changeMode("signin")}
                 >
                   Sign in

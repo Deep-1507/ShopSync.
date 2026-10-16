@@ -128,7 +128,7 @@ export default function EnterpriseShell({ children }) {
   if (!ready) {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-slate-50 text-slate-500">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-xl font-extrabold text-white shadow-lg shadow-blue-600/20">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-600 text-xl font-extrabold text-white shadow-lg shadow-emerald-600/20">
           S
         </div>
 
@@ -201,20 +201,19 @@ export default function EnterpriseShell({ children }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-72 flex-col overflow-hidden border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-72 flex-col overflow-hidden border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         {/* Logo */}
         <Link
           href="/enterprise/dashboard"
           className="flex h-14 shrink-0 items-center gap-2 border-b border-slate-100 px-5 text-lg font-extrabold tracking-tight text-slate-900"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-lg text-white shadow-md shadow-blue-600/20">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-lg text-white shadow-md shadow-emerald-600/20">
             S
           </span>
 
-          ShopSync<span className="text-blue-600">.</span>
+          ShopSync<span className="text-emerald-600">.</span>
         </Link>
 
         {/* Enterprise information */}
@@ -236,7 +235,7 @@ export default function EnterpriseShell({ children }) {
               <div className="flex items-start gap-1.5 text-[11px] leading-4 text-slate-500">
                 <MapPin
                   size={13}
-                  className="mt-0.5 shrink-0 text-blue-600"
+                  className="mt-0.5 shrink-0 text-emerald-600"
                 />
 
                 <span className="line-clamp-2 break-words">
@@ -247,7 +246,7 @@ export default function EnterpriseShell({ children }) {
           </div>
 
           <div className="mt-2 flex items-center gap-2 px-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
 
             <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
               Workspace active
@@ -272,20 +271,18 @@ export default function EnterpriseShell({ children }) {
                 <div key={item.href}>
                   <button
                     type="button"
-                    className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[13px] font-semibold transition ${
-                      active
-                        ? "bg-blue-50 text-blue-700"
+                    className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[13px] font-semibold transition ${active
+                        ? "bg-emerald-50 text-emerald-700"
                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
-                    }`}
+                      }`}
                     onClick={() => toggleDropdown(item)}
                     aria-expanded={isOpen}
                   >
                     <span
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                        active
-                          ? "bg-blue-100 text-blue-700"
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${active
+                          ? "bg-emerald-100 text-emerald-700"
                           : "bg-slate-100 text-slate-500"
-                      }`}
+                        }`}
                     >
                       <Icon size={18} />
                     </span>
@@ -296,9 +293,8 @@ export default function EnterpriseShell({ children }) {
 
                     <ChevronDown
                       size={16}
-                      className={`shrink-0 text-slate-400 transition-transform ${
-                        isOpen ? "rotate-180" : ""
-                      }`}
+                      className={`shrink-0 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
 
@@ -312,18 +308,16 @@ export default function EnterpriseShell({ children }) {
                             key={child.href}
                             href={child.href}
                             onClick={() => setMobileOpen(false)}
-                            className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[11px] transition ${
-                              childActive
-                                ? "bg-blue-50 font-bold text-blue-700"
+                            className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[11px] transition ${childActive
+                                ? "bg-emerald-50 font-bold text-emerald-700"
                                 : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                            }`}
+                              }`}
                           >
                             <span
-                              className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                                childActive
-                                  ? "bg-blue-600"
+                              className={`h-1.5 w-1.5 shrink-0 rounded-full ${childActive
+                                  ? "bg-emerald-600"
                                   : "bg-slate-300"
-                              }`}
+                                }`}
                             />
 
                             <span className="truncate">{child.label}</span>
@@ -341,18 +335,16 @@ export default function EnterpriseShell({ children }) {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold transition ${
-                  active
-                    ? "bg-blue-50 text-blue-700"
+                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold transition ${active
+                    ? "bg-emerald-50 text-emerald-700"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
-                }`}
+                  }`}
               >
                 <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition ${
-                    active
-                      ? "bg-blue-100 text-blue-700"
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition ${active
+                      ? "bg-emerald-100 text-emerald-700"
                       : "bg-slate-100 text-slate-500"
-                  }`}
+                    }`}
                 >
                   <Icon size={18} />
                 </span>
@@ -365,8 +357,8 @@ export default function EnterpriseShell({ children }) {
 
         {/* Sidebar footer */}
         <div className="shrink-0 border-t border-slate-100 p-3">
-          <div className="mb-2 flex items-center gap-2 rounded-xl bg-blue-50 p-2">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
+          <div className="mb-2 flex items-center gap-2 rounded-xl bg-emerald-50 p-2">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-emerald-600 shadow-sm">
               <HelpCircle size={17} />
             </span>
 
@@ -411,7 +403,7 @@ export default function EnterpriseShell({ children }) {
             </button>
 
             <div className="flex min-w-0 items-center gap-2 text-[13px]">
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-600" />
 
               <span className="shrink-0 font-medium text-slate-500">
                 Enterprise
@@ -420,7 +412,9 @@ export default function EnterpriseShell({ children }) {
               <span className="text-slate-300">/</span>
 
               <span className="truncate font-bold capitalize text-slate-900">
-                {pathname?.split("/").filter(Boolean).at(-1) || "dashboard"}
+                {navItems
+                  .flatMap((item) => [item, ...(item.children || [])])
+                  .find((item) => item.href === pathname)?.label || "Dashboard"}
               </span>
             </div>
           </div>
@@ -428,14 +422,14 @@ export default function EnterpriseShell({ children }) {
           <nav className="hidden shrink-0 items-center gap-5 text-[13px] font-medium text-slate-500 md:flex">
             <Link
               href="/enterprise/dashboard"
-              className="transition hover:text-blue-600"
+              className="transition hover:text-emerald-600"
             >
               Overview
             </Link>
 
             <Link
               href="/enterprise/products"
-              className="transition hover:text-blue-600"
+              className="transition hover:text-emerald-600"
             >
               Products
             </Link>
@@ -444,7 +438,7 @@ export default function EnterpriseShell({ children }) {
           {/* Profile menu */}
           <div className="relative flex shrink-0 items-center">
             <span
-              className="mr-2 h-2 w-2 rounded-full bg-blue-600 ring-4 ring-blue-50"
+              className="mr-2 h-2 w-2 rounded-full bg-emerald-600 ring-4 ring-emerald-50"
               title="Workspace active"
             />
 
@@ -455,7 +449,7 @@ export default function EnterpriseShell({ children }) {
               aria-label="Open enterprise profile menu"
               aria-expanded={profileOpen}
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600 text-sm font-bold text-white shadow-sm">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-600 text-sm font-bold text-white shadow-sm">
                 {initial}
               </span>
 
@@ -471,9 +465,8 @@ export default function EnterpriseShell({ children }) {
 
               <ChevronDown
                 size={15}
-                className={`hidden text-slate-400 transition-transform sm:block ${
-                  profileOpen ? "rotate-180" : ""
-                }`}
+                className={`hidden text-slate-400 transition-transform sm:block ${profileOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
 
@@ -482,7 +475,7 @@ export default function EnterpriseShell({ children }) {
                 <Link
                   href="/enterprise/profile"
                   onClick={() => setProfileOpen(false)}
-                  className="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-600 transition hover:bg-blue-50 hover:text-blue-700"
+                  className="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700"
                 >
                   View profile
                 </Link>
