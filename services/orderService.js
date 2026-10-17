@@ -13,6 +13,8 @@ const fail = (message, statusCode) => {
 
 const roundMoney = (value) => Math.round((value + Number.EPSILON) * 100) / 100;
 
+const otp = String(Math.floor(1000 + Math.random() * 9000));
+
 export async function createOrder(customerId, body) {
   await connectDB();
 
@@ -63,8 +65,8 @@ export async function createOrder(customerId, body) {
       _id: item.productId,
       // enterpriseId
     });
-   
- 
+
+
 
     if (!product) {
       fail("A product was not found for this enterprise", 404);
@@ -152,6 +154,7 @@ export async function createOrder(customerId, body) {
     billingAddress,
     notes,
     dueDate,
+    otp, // Newly generated 4-digit OTP
   });
 
   return order;
@@ -321,7 +324,8 @@ export async function getOrders(filters = {}, page = 1, limit = 10) {
   const [orders, total] = await Promise.all([
     Order.find(filters)
       .select("-payments.transactionId")
-      .populate("customerId", "name email phone")
+      .populate("customerId", "name email phone location latitude longitude")
+      .populate("enterpriseId", "name email phone enterpriseName")
       .populate("products.productId", "name sku photo_url")
       .sort({ createdAt: -1 })
       .skip(skip)

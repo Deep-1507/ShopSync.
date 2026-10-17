@@ -89,12 +89,21 @@ const enterpriseSchema = new mongoose.Schema(
         {
           type: String,
           enum: {
-            values: ["Online", "COD", "COT"],
-            message: "Payment type must be Online, COD, or COT",
+            values: [
+              "prepaid_online",
+              "cash_on_takeaway",
+              "cash_on_delivery",
+            ],
+            message:
+              "Payment type must be prepaid_online, cash_on_takeaway, or cash_on_delivery",
           },
         },
       ],
-      default: ["Online", "COD", "COT"],
+      default: [
+        "prepaid_online",
+        "cash_on_takeaway",
+        "cash_on_delivery",
+      ],
     },
 
     isAcceptingOnlineOrders: {

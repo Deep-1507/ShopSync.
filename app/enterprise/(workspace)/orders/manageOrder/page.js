@@ -7,7 +7,18 @@ import {
   useState,
 } from "react";
 
-import { enterpriseRequest } from "../../../../../lib/enterpriseClient";
+import { enterpriseRequest, getEnterpriseSession } from "../../../../../lib/enterpriseClient";
+
+import {
+  LayoutDashboard,
+  Package,
+  ClipboardList,
+  UserRound,
+  MapPin,
+  ChevronDown,
+  LogOut,
+  HelpCircle,
+} from "lucide-react";
 
 const PAGE_SIZE = 10;
 
@@ -21,9 +32,9 @@ const money = (value) =>
 const dateText = (value) =>
   value
     ? new Date(value).toLocaleString("en-IN", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      })
+      dateStyle: "medium",
+      timeStyle: "short",
+    })
     : "—";
 
 const dateInputText = (value) => {
@@ -34,11 +45,11 @@ const dateInputText = (value) => {
   return Number.isNaN(date.getTime())
     ? ""
     : `${date.getFullYear()}-${String(
-        date.getMonth() + 1
-      ).padStart(2, "0")}-${String(date.getDate()).padStart(
-        2,
-        "0"
-      )}`;
+      date.getMonth() + 1
+    ).padStart(2, "0")}-${String(date.getDate()).padStart(
+      2,
+      "0"
+    )}`;
 };
 
 function normaliseOrders(result) {
@@ -101,6 +112,14 @@ export default function ManageOrdersPage() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [orderToReview, setOrderToReview] = useState(null);
+  const [updatingOrder, setUpdatingOrder] = useState(false);
+
+  const [orderToVerify, setOrderToVerify] = useState(null);
+  const [otpValue, setOtpValue] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [otpVerified, setOtpVerified] = useState(false);
 
   const [pagination, setPagination] = useState({
     total: 0,
@@ -203,9 +222,9 @@ export default function ManageOrdersPage() {
       const matchesStatus =
         status === "all" ||
         String(order.orderStatus || "").toLowerCase() ===
-          status ||
+        status ||
         String(order.paymentStatus || "").toLowerCase() ===
-          status;
+        status;
 
       const matchesFrom =
         !dateFrom || (date && date >= dateFrom);
@@ -425,46 +444,172 @@ export default function ManageOrdersPage() {
     );
   }
 
+  const updateOrderStatus = async (order, nextStatus) => {
+    const action = nextStatus === "confirmed" ? "accept" : "cancel";
+
+    if (!window.confirm(`Are you sure you want to ${action} this order?`)) {
+      return;
+    }
+
+    try {
+      setUpdatingOrder(true);
+
+      const session = getEnterpriseSession();
+      const token = session?.token;
+
+      if (!token) {
+        alert("Your session has expired. Please log in again.");
+        return;
+      }
+
+      const response = await fetch(`/api/orders/${order._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          orderStatus: nextStatus,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Unable to update order status");
+      }
+
+      // Update the order in the currently displayed list.
+      // Replace setOrders with your existing orders state setter if named differently.
+      setOrders((previousOrders) =>
+        previousOrders.map((item) =>
+          item._id === order._id
+            ? { ...item, ...result.order, orderStatus: nextStatus }
+            : item
+        )
+      );
+
+      setOrderToReview(null);
+      alert(`Order ${nextStatus === "confirmed" ? "accepted" : "cancelled"} successfully.`);
+    } catch (error) {
+      console.error("Order status update failed:", error);
+      alert(error.message || "Something went wrong.");
+    } finally {
+      setUpdatingOrder(false);
+    }
+  };
+
+  const verifyOrderOtp = async (event) => {
+    event.preventDefault();
+
+    if (!orderToVerify?._id) {
+      setOtpError("Order ID is missing.");
+      return;
+    }
+
+    if (!/^\d{4}$/.test(otpValue)) {
+      setOtpError("Please enter a valid 4-digit OTP.");
+      return;
+    }
+
+    try {
+      setUpdatingOrder(true);
+      setOtpError("");
+
+      const session = getEnterpriseSession();
+      const token = session?.token;
+
+      if (!token) {
+        throw new Error("Your session has expired. Please log in again.");
+      }
+
+      const response = await fetch("/api/orders/verify-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          orderId: orderToVerify._id,
+          otp: otpValue,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "OTP verification failed.");
+      }
+
+      // Update the order in the current table without a page reload.
+      setOrders((previousOrders) =>
+        previousOrders.map((order) =>
+          order._id === orderToVerify._id
+            ? {
+              ...order,
+              ...(result.order || {}),
+              orderStatus: "completed",
+              paymentStatus: "paid",
+            }
+            : order
+        )
+      );
+
+      setOrderToVerify((previousOrder) => ({
+        ...previousOrder,
+        ...(result.order || {}),
+        orderStatus: "completed",
+        paymentStatus: "paid",
+      }));
+
+      setOtpVerified(true);
+    } catch (error) {
+      setOtpError(error.message || "Something went wrong. Please try again.");
+    } finally {
+      setUpdatingOrder(false);
+    }
+  };
+
   return (
     <div className="flex w-full flex-col gap-6 bg-slate-50/70 p-4 sm:p-6 lg:p-8">
       {/* Page heading and actions */}
- <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+      <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div className="min-w-0">
           <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-600">
             ORDER MANAGEMENT
           </span>
 
           <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-           Orders &amp; Bills
+            Orders &amp; Bills
           </h1>
 
           <p className="mt-1 text-sm text-slate-500">
             Review enterprise orders, inspect invoices, and
-              print individual or filtered bills.
+            print individual or filtered bills.
           </p>
         </div>
 
         <div className="flex w-full shrink-0 flex-wrap items-center justify-start gap-3 sm:ml-auto sm:w-auto sm:justify-end">
-            <button
-              type="button"
-              onClick={() => loadOrders(currentPage)}
-              disabled={loading}
-              className="rounded-lg border border-[#dfe8e2] bg-white px-2 py-1 text-xs font-bold text-[#44564a] transition-colors hover:bg-[#f5f9f6] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              ↻ Refresh
-            </button>
+          <button
+            type="button"
+            onClick={() => loadOrders(currentPage)}
+            disabled={loading}
+            className="rounded-lg border border-[#dfe8e2] bg-white px-2 py-1 text-xs font-bold text-[#44564a] transition-colors hover:bg-[#f5f9f6] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            ↻ Refresh
+          </button>
 
-            <button
-              type="button"
-              onClick={printAll}
-              disabled={!filteredOrders.length}
-              className="rounded-lg bg-emerald-600 px-2 py-1 text-xs font-extrabold text-white transition-colors hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              ▤ Print filtered bills
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={printAll}
+            disabled={!filteredOrders.length}
+            className="rounded-lg bg-emerald-600 px-2 py-1 text-xs font-extrabold text-white transition-colors hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            ▤ Print filtered bills
+          </button>
+        </div>
 
-       
+
       </section>
 
 
@@ -610,6 +755,7 @@ export default function ManageOrdersPage() {
             <table className="w-full min-w-[850px] border-collapse text-left text-xs [&_th]:border-b [&_th]:border-[#e8eee9] [&_th]:bg-[#f8faf8] [&_th]:px-4 [&_th]:py-3 [&_th]:text-[10px] [&_th]:font-extrabold [&_th]:uppercase [&_th]:tracking-wide [&_th]:text-[#78857c] [&_td]:border-b [&_td]:border-[#edf1ee] [&_td]:px-4 [&_td]:py-3 [&_td]:align-middle [&_td>strong]:block [&_td>small]:mt-1 [&_td>small]:block [&_td>small]:text-[10px] [&_td>small]:text-[#829087] [&_tbody_tr:hover]:bg-[#fbfdfb]">
               <thead>
                 <tr>
+                  <th>Action</th>
                   <th>Bill / Date</th>
                   <th>Customer</th>
                   <th>Items</th>
@@ -622,21 +768,61 @@ export default function ManageOrdersPage() {
 
               <tbody>
                 {filteredOrders.map((order) => (
-                  <tr
-                    key={order._id || order.billNumber}
-                  >
+                  <tr key={order._id || order.billNumber}>
+                    {/* Action column */}
+                    {/* Action column */}
+                    <td>
+                      {String(order.orderStatus || "placed").toLowerCase() ===
+                        "placed" ? (
+                        <button
+                          type="button"
+                          onClick={() => setOrderToReview(order)}
+                          className="min-w-[180px] rounded-lg border border-amber-300 bg-amber-100 px-3 py-2.5 text-left text-xs font-extrabold text-amber-900 transition hover:bg-amber-200"
+                        >
+                          <span className="block">Order placed</span>
+                          <span className="mt-1 block text-[10px] font-semibold">
+                            Click to view and confirm →
+                          </span>
+                        </button>
+                      ) : String(order.orderStatus || "").toLowerCase() ===
+                        "confirmed" ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOrderToVerify(order);
+                            setOtpValue("");
+                            setOtpError("");
+                            setOtpVerified(false);
+                          }}
+                          className="min-w-[150px] rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-left text-xs font-extrabold text-blue-800 transition hover:bg-blue-100"
+                        >
+                          <span className="block">Verify Order</span>
+                          <span className="mt-1 block text-[10px] font-semibold">
+                            Verify by OTP →
+                          </span>
+                        </button>
+                      ) : String(order.orderStatus || "").toLowerCase() ===
+                        "completed" ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
+                          <span>✓</span> Verified & Completed
+                        </span>
+                      ) : (
+                        <span className="text-xs text-[#829087]">—</span>
+                      )}
+                    </td>
+
+                    {/* Bill / Date */}
                     <td>
                       <strong className="font-extrabold text-[#26372c]">
                         {order.billNumber || "—"}
                       </strong>
 
                       <small>
-                        {dateText(
-                          order.billDate || order.createdAt
-                        )}
+                        {dateText(order.billDate || order.createdAt)}
                       </small>
                     </td>
 
+                    {/* Customer */}
                     <td>
                       <strong>
                         {order.customerId?.name ||
@@ -652,22 +838,22 @@ export default function ManageOrdersPage() {
                       </small>
                     </td>
 
+                    {/* Items */}
                     <td>
                       <strong>
                         {(order.products || []).reduce(
-                          (sum, item) =>
-                            sum + (Number(item.quantity) || 0),
+                          (sum, item) => sum + (Number(item.quantity) || 0),
                           0
                         )}{" "}
                         items
                       </strong>
 
                       <small>
-                        {(order.products || []).length} product
-                        types
+                        {(order.products || []).length} product types
                       </small>
                     </td>
 
+                    {/* Grand total */}
                     <td>
                       <strong className="font-extrabold text-emerald-700">
                         {money(order.grandTotal)}
@@ -678,30 +864,21 @@ export default function ManageOrdersPage() {
                       </small>
                     </td>
 
+                    {/* Payment status */}
                     <td>
-                      <span
-                        className={statusClass(
-                          order.paymentStatus
-                        )}
-                      >
-                        {String(
-                          order.paymentStatus || "pending"
-                        ).replaceAll("_", " ")}
+                      <span className={statusClass(order.paymentStatus)}>
+                        {String(order.paymentStatus || "pending").replaceAll("_", " ")}
                       </span>
                     </td>
 
+                    {/* Order status */}
                     <td>
-                      <span
-                        className={statusClass(
-                          order.orderStatus
-                        )}
-                      >
-                        {String(
-                          order.orderStatus || "placed"
-                        ).replaceAll("_", " ")}
+                      <span className={statusClass(order.orderStatus)}>
+                        {String(order.orderStatus || "placed").replaceAll("_", " ")}
                       </span>
                     </td>
 
+                    {/* Existing actions */}
                     <td>
                       <div className="flex items-center justify-end gap-2 whitespace-nowrap [&>button]:rounded-md [&>button]:border [&>button]:border-[#dfe8e2] [&>button]:bg-white [&>button]:px-2.5 [&>button]:py-2 [&>button]:text-[10px] [&>button]:font-bold [&>button]:text-[#44564a] [&>button:hover]:bg-[#f5f9f6]">
                         <button
@@ -854,7 +1031,7 @@ export default function ManageOrdersPage() {
                   Created{" "}
                   {dateText(
                     selectedOrder.billDate ||
-                      selectedOrder.createdAt
+                    selectedOrder.createdAt
                   )}
                 </p>
               </div>
@@ -1085,6 +1262,588 @@ export default function ManageOrdersPage() {
           ? renderBill(selectedOrder)
           : filteredOrders.map(renderBill)}
       </section>
+
+
+      {orderToReview && (
+        <div
+          className="fixed inset-0 z-[1100] flex items-center justify-center overflow-y-auto bg-[#10251bd1] p-3 sm:p-6 print:hidden"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !updatingOrder) {
+              setOrderToReview(null);
+            }
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="review-order-heading"
+            className="relative my-auto max-h-[calc(100vh-24px)] w-full max-w-4xl overflow-y-auto rounded-2xl border border-[#e5ece7] bg-white p-4 shadow-2xl sm:max-h-[calc(100vh-48px)] sm:p-7"
+          >
+            <button
+              type="button"
+              disabled={updatingOrder}
+              onClick={() => setOrderToReview(null)}
+              aria-label="Close order review"
+              className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-lg border border-[#e4ebe6] text-xl text-[#526158] hover:bg-[#f5f9f6] disabled:opacity-50"
+            >
+              ×
+            </button>
+
+            <div className="mb-6 pr-10">
+              <span className="mb-2 block text-[10px] font-extrabold tracking-[0.13em] text-amber-700">
+                ORDER REVIEW REQUIRED
+              </span>
+
+              <h2
+                id="review-order-heading"
+                className="text-xl font-extrabold text-[#26372c]"
+              >
+                Review {orderToReview.billNumber || "customer order"}
+              </h2>
+
+              <p className="mt-2 text-xs text-[#829087]">
+                Review the details before accepting or cancelling this order.
+              </p>
+            </div>
+
+            {/* Customer and order information */}
+            <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-lg border border-[#e8eee9] p-3">
+                <span className="block text-[10px] text-[#87938a]">Customer</span>
+                <strong className="mt-1 block break-words text-sm text-[#26372c]">
+                  {orderToReview.customerId?.name ||
+                    orderToReview.customerName ||
+                    "Customer"}
+                </strong>
+
+                <p className="mt-1 break-all text-[10px] text-[#829087]">
+                  Customer ID:{" "}
+                  {orderToReview.customerId?._id ||
+                    (typeof orderToReview.customerId === "string"
+                      ? orderToReview.customerId
+                      : "—")}
+                </p>
+
+                <p className="mt-1 break-all text-xs text-[#829087]">
+                  {orderToReview.customerId?.email ||
+                    (typeof orderToReview.customerId === "string"
+                      ? orderToReview.customerId
+                      : "—")}
+                </p>
+                <p className="mt-1 break-all text-xs text-[#829087]">
+                  {orderToReview.customerId?.phone ||
+                    (typeof orderToReview.customerId === "string"
+                      ? orderToReview.customerId
+                      : "—")}
+                </p>
+                <div className="mt-2 rounded-xl border border-[#e5ebe7] bg-[#f8faf9] p-3">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#829087]">
+                    Delivery/Billing Address
+                  </p>
+
+                  <div className="mt-2 flex items-start gap-2">
+                    <span className="mt-0.5 text-base">
+                      <MapPin
+                        size={18}
+                        className="mt-0.5 shrink-0 text-emerald-600"
+                      />
+                    </span>
+
+                    <div className="min-w-0 text-xs leading-6 text-[#35483d]">
+                      {orderToReview?.customerId?.location ? (
+                        <>
+                          <p className="font-semibold">
+                            {orderToReview.customerId.location.addressLine}
+                          </p>
+
+                          <p>
+                            {[
+                              orderToReview.customerId.location.landmark,
+                              orderToReview.customerId.location.district,
+                            ]
+                              .filter(Boolean)
+                              .join(", ")}
+                          </p>
+
+                          <p>
+                            {[
+                              orderToReview.customerId.location.state,
+                              orderToReview.customerId.location.pinCode,
+                            ]
+                              .filter(Boolean)
+                              .join(" - ")}
+                          </p>
+
+                          <a
+                            href={`https://www.google.com/maps?q=${orderToReview.customerId.latitude},${orderToReview.customerId.longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-1 inline-block font-semibold text-blue-600 underline underline-offset-2 hover:text-blue-800"
+                          >
+                            View location ↗
+                          </a>
+
+                        </>
+                      ) : (
+                        <p className="text-[#829087]">Address not available</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div className="rounded-lg border border-[#e8eee9] p-3">
+                <span className="block text-[10px] text-[#87938a]">Order details</span>
+                <p className="mt-1 text-xs text-[#526158]">
+                  <strong>Bill ID:</strong> {orderToReview._id || "—"}
+                </p>
+                <p className="mt-1 text-xs text-[#526158]">
+                  <strong>Bill No.:</strong> {orderToReview.billNumber || "—"}
+                </p>
+                <p className="mt-2 text-xs text-[#526158]">
+                  <strong>Date:</strong>{" "}
+                  {dateText(orderToReview.billDate || orderToReview.createdAt)}
+                </p>
+                <p className="mt-2 text-xs text-[#526158]">
+                  <strong>Type:</strong> {orderToReview.orderType || "—"}
+                </p>
+                <p className="mt-2 text-xs text-[#526158]">
+                  <strong>Status:</strong>{" "}
+                  {String(orderToReview.orderStatus || "").replaceAll("_", " ")}
+                </p>
+                <p className="mt-2 text-xs text-[#526158]">
+                  <strong>Payment Status:</strong>{" "}
+                  {String(orderToReview.paymentStatus || "").replaceAll("_", " ")}
+                </p>
+                <p className="mt-2 text-xs text-[#526158]">
+                  <strong>Payment Type:</strong>{" "}
+                  {String(orderToReview.paymentType || "").replaceAll("_", " ")}
+                </p>
+                <p className="mt-2 text-xs text-[#526158]">
+                  <strong>Note by Customer:</strong>{" "}
+                  {String(orderToReview.notes || "No Remarks").replaceAll("_", " ")}
+                </p>
+              </div>
+
+              {/* <div className="rounded-lg border border-[#e8eee9] p-3 sm:col-span-2">
+                <span className="block text-[10px] text-[#87938a]">
+                  Billing address
+                </span>
+                <strong className="mt-1 block break-words text-xs text-[#26372c]">
+                  {typeof orderToReview.billingAddress === "string"
+                    ? orderToReview.billingAddress
+                    : orderToReview.billingAddress
+                      ? [
+                        orderToReview.customerId.location.addressLine,
+                        orderToReview.customerId.location.landmark,
+                        orderToReview.customerId.location.district,
+                        orderToReview.customerId.location.state,
+                        orderToReview.customerId.location.pinCode,
+                      ]
+                        .filter(Boolean)
+                        .join(", ")
+                      : "—"}
+                </strong>
+              </div> */}
+            </div>
+
+            {/* Ordered products */}
+            <h3 className="mb-3 text-sm font-extrabold text-[#26372c]">
+              Items ordered
+            </h3>
+
+            <div className="mb-6 w-full overflow-x-auto rounded-lg border border-[#e8eee9]">
+              <table className="w-full min-w-[600px] border-collapse text-xs">
+                <thead className="bg-[#f8faf8] text-left text-[10px] uppercase text-[#78857c]">
+                  <tr>
+                    <th className="px-3 py-3">Product</th>
+                    <th className="px-3 py-3">Item Name</th>
+                    <th className="px-3 py-3">Qty</th>
+                    <th className="px-3 py-3">Unit price</th>
+                    <th className="px-3 py-3">Discount</th>
+                    <th className="px-3 py-3">Tax</th>
+                    <th className="px-3 py-3">Total</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {(orderToReview.products || []).map((item, index) => (
+                    <tr
+                      key={
+                        item._id ||
+                        item.productId?._id ||
+                        `${item.productId}-${index}`
+                      }
+                      className="border-t border-[#edf1ee]"
+                    >
+                      <td className="px-3 py-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={item.productId?.photo_url || "/placeholder.png"}
+                            alt={item.productId?.name || item.name || "Product"}
+                            className="h-12 w-12 rounded-lg border border-[#e5ebe7] object-cover"
+                          />
+                        </div>
+                      </td>
+                      <td className="px-3 py-3">
+                        <strong className="block text-[#26372c]">
+                          {item.productId?.name ||
+                            item.name ||
+                            String(item.productId || "Product")}
+                        </strong>
+                        <small className="mt-1 block text-[10px] text-[#829087]">
+                          {item.productId?.sku || item.sku || ""}
+                        </small>
+                      </td>
+                      <td className="px-3 py-3">{item.quantity}</td>
+                      <td className="px-3 py-3">{money(item.unitPrice)}</td>
+                      <td className="px-3 py-3">{money(item.discount)}</td>
+                      <td className="px-3 py-3">{Number(item.taxRate) || 0}%</td>
+                      <td className="px-3 py-3 font-bold">
+                        {money(item.lineTotal)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Payment records and totals */}
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div>
+                <h3 className="mb-3 text-sm font-extrabold text-[#26372c]">
+                  Payment records
+                </h3>
+
+                {(orderToReview.payments || []).length > 0 ? (
+                  orderToReview.payments.map((payment, index) => (
+                    <div
+                      key={payment._id || index}
+                      className="flex items-center justify-between gap-3 border-b border-[#edf1ee] py-3"
+                    >
+                      <div>
+                        <strong className="block text-xs">
+                          {String(payment.method || "other").replaceAll("_", " ")}
+                        </strong>
+                        <small className="mt-1 block text-[10px] text-[#829087]">
+                          {payment.transactionId || "No transaction ID"} ·{" "}
+                          {payment.status || "pending"}
+                        </small>
+                      </div>
+                      <strong className="text-xs">{money(payment.amount)}</strong>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-[#829087]">
+                    No payment records attached.
+                  </p>
+                )}
+
+                {orderToReview.notes && (
+                  <p className="mt-4 rounded-lg bg-[#f5f9f6] p-3 text-xs leading-relaxed text-[#526158]">
+                    <strong>Notes:</strong> {orderToReview.notes}
+                  </p>
+                )}
+              </div>
+
+              <div className="rounded-xl bg-[#f8faf8] p-4 text-xs">
+                {[
+                  ["Subtotal", orderToReview.subtotal],
+                  ["Discount", orderToReview.totalDiscount],
+                  ["Tax", orderToReview.totalTax],
+                  ["Shipping", orderToReview.shippingCharges],
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="flex items-center justify-between gap-3 py-2 text-[#78857c]"
+                  >
+                    <span>{label}</span>
+                    <strong className="text-[#29372e]">{money(value)}</strong>
+                  </div>
+                ))}
+
+                <div className="mt-2 flex items-center justify-between gap-3 border-t border-dashed border-[#dfe8e2] pt-3">
+                  <span className="font-extrabold">Grand total</span>
+                  <strong className="text-xl text-emerald-700">
+                    {money(orderToReview.grandTotal)}
+                  </strong>
+                </div>
+
+                <div className="flex items-center justify-between gap-3 py-2 text-[#78857c]">
+                  <span>Amount paid</span>
+                  <strong className="text-[#29372e]">
+                    {money(orderToReview.amountPaid)}
+                  </strong>
+                </div>
+
+                <div className="flex items-center justify-between gap-3 py-2 text-[#78857c]">
+                  <span>Balance due</span>
+                  <strong className="text-[#29372e]">
+                    {money(orderToReview.balanceDue)}
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            {/* Accept / cancel actions */}
+            <div className="mt-7 flex flex-col-reverse gap-3 border-t border-[#edf1ee] pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <button
+                type="button"
+                disabled={updatingOrder}
+                onClick={() => setOrderToReview(null)}
+                className="rounded-lg border border-[#dfe8e2] bg-white px-5 py-3 text-xs font-bold text-[#44564a] hover:bg-[#f5f9f6] disabled:opacity-50"
+              >
+                Close
+              </button>
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  disabled={updatingOrder}
+                  onClick={() => updateOrderStatus(orderToReview, "cancelled")}
+                  className="rounded-lg border border-red-200 bg-red-50 px-5 py-3 text-xs font-extrabold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {updatingOrder ? "Updating…" : "Cancel order"}
+                </button>
+
+                <button
+                  type="button"
+                  disabled={updatingOrder}
+                  onClick={() => updateOrderStatus(orderToReview, "confirmed")}
+                  className="rounded-lg bg-emerald-600 px-5 py-3 text-xs font-extrabold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {updatingOrder ? "Updating…" : "✓ Accept order"}
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {/* OTP Verification Dialog */}
+      {orderToVerify && (
+        <div
+          className="fixed inset-0 z-[1200] flex items-center justify-center bg-[#10251bd1] p-4 print:hidden"
+          onMouseDown={(event) => {
+            if (
+              event.target === event.currentTarget &&
+              !updatingOrder
+            ) {
+              setOrderToVerify(null);
+              setOtpValue("");
+              setOtpError("");
+              setOtpVerified(false);
+            }
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="verify-otp-heading"
+            className="relative w-full max-w-md rounded-2xl border border-[#e5ece7] bg-white p-6 shadow-2xl sm:p-8"
+          >
+            {!otpVerified ? (
+              <>
+                <button
+                  type="button"
+                  disabled={updatingOrder}
+                  onClick={() => {
+                    setOrderToVerify(null);
+                    setOtpValue("");
+                    setOtpError("");
+                  }}
+                  aria-label="Close OTP dialog"
+                  className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-lg border border-[#e4ebe6] text-xl text-[#526158] hover:bg-[#f5f9f6] disabled:opacity-50"
+                >
+                  ×
+                </button>
+
+                <div className="mb-6">
+                  <span className="mb-2 block text-[10px] font-extrabold tracking-[0.15em] text-blue-700">
+                    ORDER VERIFICATION
+                  </span>
+
+                  <h2
+                    id="verify-otp-heading"
+                    className="text-xl font-extrabold text-[#26372c]"
+                  >
+                    Verify order by OTP
+                  </h2>
+
+                  <p className="mt-2 text-sm text-[#829087]">
+                    Enter the four-digit OTP provided for this order to
+                    complete it.
+                  </p>
+                </div>
+
+                <div className="mb-6 space-y-3 rounded-xl border border-[#e8eee9] bg-[#f8faf9] p-4">
+                  <div>
+                    <span className="block text-[10px] font-semibold uppercase tracking-wider text-[#87938a]">
+                      Bill number
+                    </span>
+                    <strong className="mt-1 block break-all text-sm text-[#26372c]">
+                      {orderToVerify.billNumber || "—"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span className="block text-[10px] font-semibold uppercase tracking-wider text-[#87938a]">
+                      Order ID
+                    </span>
+                    <strong className="mt-1 block break-all text-xs text-[#26372c]">
+                      {orderToVerify._id}
+                    </strong>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-[#e5ebe7] pt-3">
+                    <span className="text-xs text-[#78857c]">
+                      Order total
+                    </span>
+                    <strong className="text-base font-extrabold text-emerald-700">
+                      {money(orderToVerify.grandTotal)}
+                    </strong>
+                  </div>
+                </div>
+
+                <form onSubmit={verifyOrderOtp}>
+                  <label
+                    htmlFor="order-verification-otp"
+                    className="mb-2 block text-xs font-bold text-[#26372c]"
+                  >
+                    Enter 4-digit OTP
+                  </label>
+
+                  <input
+                    id="order-verification-otp"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    pattern="[0-9]{4}"
+                    maxLength={4}
+                    required
+                    value={otpValue}
+                    disabled={updatingOrder}
+                    onChange={(event) => {
+                      setOtpValue(
+                        event.target.value.replace(/\D/g, "").slice(0, 4)
+                      );
+                      setOtpError("");
+                    }}
+                    placeholder="• • • •"
+                    className="w-full rounded-xl border border-[#dfe8e2] bg-white px-4 py-4 text-center text-2xl font-extrabold tracking-[0.6em] text-[#26372c] outline-none transition placeholder:text-[#c2ccc5] focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:bg-slate-50"
+                  />
+
+                  {otpError && (
+                    <p
+                      role="alert"
+                      className="mt-3 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700"
+                    >
+                      {otpError}
+                    </p>
+                  )}
+
+                  <div className="mt-6 flex gap-3">
+                    <button
+                      type="button"
+                      disabled={updatingOrder}
+                      onClick={() => {
+                        setOrderToVerify(null);
+                        setOtpValue("");
+                        setOtpError("");
+                      }}
+                      className="flex-1 rounded-xl border border-[#dfe8e2] bg-white px-4 py-3 text-xs font-bold text-[#44564a] hover:bg-[#f5f9f6] disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={updatingOrder || otpValue.length !== 4}
+                      className="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-xs font-extrabold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {updatingOrder ? "Verifying…" : "Verify & Complete"}
+                    </button>
+                  </div>
+                </form>
+              </>
+            ) : (
+              <div className="py-5 text-center">
+                <div className="mx-auto mb-5 grid h-20 w-20 place-items-center rounded-full bg-emerald-50 ring-8 ring-emerald-50/60">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    className="h-12 w-12 text-emerald-600"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    />
+                    <path
+                      d="m7 12.5 3.2 3.2L17.5 8.5"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+
+                <h2 className="text-2xl font-extrabold text-[#26372c]">
+                  Order verified!
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-[#78857c]">
+                  OTP verification was successful. The order has been
+                  completed and its payment status has been marked as paid.
+                </p>
+
+                <div className="mt-5 rounded-xl border border-emerald-100 bg-emerald-50/70 p-4 text-left">
+                  <p className="text-xs text-[#78857c]">Bill number</p>
+                  <strong className="mt-1 block break-all text-sm text-[#26372c]">
+                    {orderToVerify.billNumber || "—"}
+                  </strong>
+
+                  <div className="mt-3 flex items-center justify-between border-t border-emerald-100 pt-3">
+                    <span className="text-xs font-semibold text-emerald-800">
+                      Order status
+                    </span>
+                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-800">
+                      Completed
+                    </span>
+                  </div>
+
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-emerald-800">
+                      Payment status
+                    </span>
+                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-extrabold text-emerald-800">
+                      Paid
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOrderToVerify(null);
+                    setOtpValue("");
+                    setOtpError("");
+                    setOtpVerified(false);
+                  }}
+                  className="mt-6 w-full rounded-xl bg-emerald-600 px-4 py-3 text-xs font-extrabold text-white transition hover:bg-emerald-700"
+                >
+                  Done
+                </button>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
     </div>
   );
 }

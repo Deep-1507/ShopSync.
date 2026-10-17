@@ -65,9 +65,6 @@ export async function listOrdersController(filters, page, limit) {
 
   
     const result = await getOrders(filters, page, limit);
-
-   
-   console.log("Insideeeeeeeeeeeee")
     return NextResponse.json({
       success: true,
       ...result,

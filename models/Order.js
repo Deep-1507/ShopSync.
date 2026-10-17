@@ -115,8 +115,8 @@ const orderSchema = new mongoose.Schema(
 
     paymentType: {
       type: String,
-      enum: ["prepaid", "postpaid", "cash_on_delivery"],
-      default: "prepaid",
+      enum: ["prepaid", "cash_on_takeaway", "cash_on_delivery"],
+      default: "cash_on_takeaway",
     },
 
     paymentStatus: {
@@ -190,6 +190,11 @@ const orderSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: 1000,
+      default: "",
+    },
+    otp: {
+      type: String,
+      trim: true,
       default: "",
     },
 

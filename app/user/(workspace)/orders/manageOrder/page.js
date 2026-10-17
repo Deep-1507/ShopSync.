@@ -94,6 +94,17 @@ export default function ManageOrdersPage() {
     const [dateTo, setDateTo] = useState("");
     const [selectedOrder, setSelectedOrder] = useState(null);
 
+
+    const [paymentOrder, setPaymentOrder] = useState(null);
+    const [enterpriseDetails, setEnterpriseDetails] = useState(null);
+    const [enterprisePaymentTypes, setEnterprisePaymentTypes] = useState([]);
+    const [selectedPaymentType, setSelectedPaymentType] = useState("");
+    const [paymentLoading, setPaymentLoading] = useState(false);
+    const [paymentSaving, setPaymentSaving] = useState(false);
+    const [paymentError, setPaymentError] = useState("");
+    const [paymentMessage, setPaymentMessage] = useState("");
+
+
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [pagination, setPagination] = useState({
@@ -240,6 +251,158 @@ export default function ManageOrdersPage() {
 
         return `${base} bg-slate-100 text-slate-700`;
     }
+
+
+    const getEnterpriseId = (order) => {
+        const enterprise = order?.enterpriseId;
+
+        if (enterprise && typeof enterprise === "object") {
+            return enterprise._id || enterprise.id || "";
+        }
+
+        return enterprise || "";
+    };
+
+    const formatPaymentType = (value) =>
+        String(value || "")
+            .replaceAll("_", " ")
+            .replace(/\b\w/g, (char) => char.toUpperCase());
+
+    const openPaymentDialog = async (order) => {
+        setPaymentOrder(order);
+        setEnterpriseDetails(null);
+        setEnterprisePaymentTypes([]);
+        setSelectedPaymentType("");
+        setPaymentError("");
+        setPaymentMessage("");
+        setPaymentLoading(true);
+
+        try {
+            const token = localStorage.getItem("shopsync_user_token");
+
+            if (!token) {
+                throw new Error("Authentication token not found. Please sign in again.");
+            }
+
+            const enterpriseId = getEnterpriseId(order);
+
+            if (!enterpriseId) {
+                throw new Error("Enterprise ID is missing for this order.");
+            }
+
+            const result = await userRequest(
+                `/api/enterprises/${encodeURIComponent(enterpriseId)}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            // Handle common API response shapes.
+            const enterprise =
+                result?.enterprise ||
+                result?.data?.enterprise ||
+                result?.data?.data ||
+                result?.data ||
+                result;
+
+            if (!enterprise || typeof enterprise !== "object") {
+                throw new Error("Unable to load enterprise details.");
+            }
+
+            const paymentTypes = Array.isArray(enterprise.paymentTypes)
+                ? enterprise.paymentTypes
+                : [];
+
+            setEnterpriseDetails(enterprise);
+            setEnterprisePaymentTypes(paymentTypes);
+            setSelectedPaymentType(paymentTypes[0] || "");
+
+            if (paymentTypes.length === 0) {
+                setPaymentError(
+                    "This enterprise has not configured any payment types."
+                );
+            }
+        } catch (error) {
+            setPaymentError(
+                error?.message || "Unable to load enterprise payment options."
+            );
+        } finally {
+            setPaymentLoading(false);
+        }
+    };
+
+    const submitPaymentType = async () => {
+        if (!paymentOrder?._id) {
+            setPaymentError("Order ID is missing.");
+            return;
+        }
+
+        if (!selectedPaymentType) {
+            setPaymentError("Please select a payment option.");
+            return;
+        }
+
+        // Online payments must go through the actual payment gateway.
+        // Do not mark an online order as paid before gateway confirmation.
+        if (
+            ["prepaid_online", "prepaid"].includes(
+                String(selectedPaymentType).toLowerCase()
+            )
+        ) {
+            setPaymentError(
+                "Please connect the payment gateway before proceeding with online payment."
+            );
+            return;
+        }
+
+        setPaymentSaving(true);
+        setPaymentError("");
+        setPaymentMessage("");
+
+        try {
+            const token = localStorage.getItem("shopsync_user_token");
+
+            if (!token) {
+                throw new Error("Authentication token not found. Please sign in again.");
+            }
+
+            const result = await userRequest("/api/orders/update-payment-status", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    orderId: paymentOrder._id,
+                    paymentType: selectedPaymentType,
+                }),
+            });
+
+            if (result?.success === false) {
+                throw new Error(
+                    result?.message || "Unable to update the payment option."
+                );
+            }
+
+            setPaymentMessage(
+                result?.message || "Payment option updated successfully."
+            );
+
+            // Refresh the orders so the UI reflects the server response.
+            await loadOrders(currentPage);
+
+            setPaymentOrder(null);
+        } catch (error) {
+            setPaymentError(
+                error?.message || "Unable to update the payment option."
+            );
+        } finally {
+            setPaymentSaving(false);
+        }
+    };
+
 
     function renderBill(order) {
         return (
@@ -564,7 +727,9 @@ export default function ManageOrdersPage() {
                         <table className="w-full min-w-[850px] border-collapse text-left text-xs [&_th]:border-b [&_th]:border-[#e8eee9] [&_th]:bg-[#f8faf8] [&_th]:px-4 [&_th]:py-3 [&_th]:text-[10px] [&_th]:font-extrabold [&_th]:uppercase [&_th]:tracking-wide [&_th]:text-[#78857c] [&_td]:border-b [&_td]:border-[#edf1ee] [&_td]:px-4 [&_td]:py-3 [&_td]:align-middle [&_td>strong]:block [&_td>small]:mt-1 [&_td>small]:block [&_td>small]:text-[10px] [&_td>small]:text-[#829087] [&_tbody_tr:hover]:bg-[#fbfdfb]">
                             <thead>
                                 <tr>
+                                    <th>Action</th>
                                     <th>Bill / Date</th>
+                                    <th>OTP</th>
                                     <th>Enterprise</th>
                                     <th>Items</th>
                                     <th>Grand total</th>
@@ -577,6 +742,30 @@ export default function ManageOrdersPage() {
                                 {filteredOrders.map((order) => (
                                     <tr key={order._id || order.billNumber}>
                                         <td>
+                                            {String(order.orderStatus || "").toLowerCase() === "placed" && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        window.location.href =
+                                                            `/user/orders/editOrder?orderId=${encodeURIComponent(order._id)}`;
+                                                    }}
+                                                    className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-[10px] font-bold text-amber-800 hover:bg-amber-100"
+                                                >
+                                                    Edit Order
+                                                </button>
+                                            )}
+
+                                            {String(order.orderStatus || "").toLowerCase() === "confirmed" && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openPaymentDialog(order)}
+                                                    className="rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-[10px] font-bold text-emerald-800 hover:bg-emerald-100"
+                                                >
+                                                    Make Payment
+                                                </button>
+                                            )}
+                                        </td>
+                                        <td>
                                             <strong className="font-extrabold text-[#26372c]">
                                                 {order.billNumber || "—"}
                                             </strong>
@@ -586,6 +775,12 @@ export default function ManageOrdersPage() {
                                                     order.createdAt
                                                 )}
                                             </small>
+                                        </td>
+                                        <td>
+                                            <strong className="font-extrabold text-blue-600">
+                                                {order.otp || "—"}
+                                            </strong>
+
                                         </td>
 
                                         <td>
@@ -1076,6 +1271,188 @@ export default function ManageOrdersPage() {
                     ? renderBill(selectedOrder)
                     : filteredOrders.map(renderBill)}
             </section>
+
+            {paymentOrder && (
+                <div
+                    className="fixed inset-0 z-[1100] flex items-center justify-center overflow-y-auto bg-[#10251bd1] p-3 sm:p-5 print:hidden"
+                    onMouseDown={(event) => {
+                        if (event.target === event.currentTarget) {
+                            setPaymentOrder(null);
+                        }
+                    }}
+                >
+                    <section
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="payment-dialog-title"
+                        className="w-full max-w-xl rounded-2xl border border-[#e5ece7] bg-white p-5 shadow-2xl sm:p-7"
+                    >
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700">
+                                    Order payment
+                                </span>
+
+                                <h2
+                                    id="payment-dialog-title"
+                                    className="mt-2 text-xl font-extrabold text-[#26372c]"
+                                >
+                                    {paymentOrder.billNumber || "Bill details"}
+                                </h2>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => setPaymentOrder(null)}
+                                aria-label="Close payment dialog"
+                                className="rounded-lg border border-[#dfe8e2] px-3 py-1 text-xl text-[#526158] hover:bg-[#f5f9f6]"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div className="rounded-lg border border-[#e8eee9] p-3">
+                                <span className="text-[10px] text-[#87938a]">
+                                    Enterprise
+                                </span>
+                                <p className="mt-1 break-words text-sm font-bold text-[#26372c]">
+                                    {enterpriseDetails?.enterpriseName ||
+                                        paymentOrder.enterpriseId?.enterpriseName ||
+                                        paymentOrder.enterpriseName ||
+                                        "Enterprise"}
+                                </p>
+                            </div>
+
+                            <div className="rounded-lg border border-[#e8eee9] p-3">
+                                <span className="text-[10px] text-[#87938a]">
+                                    Grand total
+                                </span>
+                                <p className="mt-1 text-lg font-extrabold text-emerald-700">
+                                    {money(paymentOrder.grandTotal)}
+                                </p>
+                            </div>
+
+                            <div className="rounded-lg border border-[#e8eee9] p-3 sm:col-span-2">
+                                <span className="text-[10px] text-[#87938a]">
+                                    Current payment status
+                                </span>
+                                <p className="mt-1 text-sm font-bold capitalize text-[#26372c]">
+                                    {String(paymentOrder.paymentStatus || "pending")
+                                        .replaceAll("_", " ")}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-6">
+                            <label
+                                htmlFor="payment-type"
+                                className="mb-2 block text-xs font-bold text-[#44564a]"
+                            >
+                                Select payment method
+                            </label>
+
+                            <select
+                                id="payment-type"
+                                value={selectedPaymentType}
+                                onChange={(event) => {
+                                    setSelectedPaymentType(event.target.value);
+                                    setPaymentError("");
+                                    setPaymentMessage("");
+                                }}
+                                disabled={paymentLoading || paymentSaving}
+                                className="h-11 w-full rounded-lg border border-[#dfe8e2] bg-white px-3 text-sm text-[#44564a] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                            >
+                                <option value="">Select a payment method</option>
+
+                                {enterprisePaymentTypes.map((type) => (
+                                    <option key={type} value={type}>
+                                        {formatPaymentType(type)}
+                                    </option>
+                                ))}
+                            </select>
+
+                            {paymentLoading && (
+                                <p className="mt-2 text-xs text-[#829087]">
+                                    Loading enterprise payment options...
+                                </p>
+                            )}
+                        </div>
+
+                        {selectedPaymentType === "prepaid_online" && (
+                            <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 p-4">
+                                <h3 className="text-sm font-bold text-blue-900">
+                                    Online payment
+                                </h3>
+                                <p className="mt-1 text-xs leading-5 text-blue-800">
+                                    Continue to the payment gateway to pay securely.
+                                    The gateway integration is not configured yet.
+                                </p>
+
+                                <button
+                                    type="button"
+                                    disabled
+                                    className="mt-3 w-full rounded-lg bg-blue-600 px-4 py-3 text-xs font-extrabold text-white opacity-50"
+                                >
+                                    Proceed to Payment Gateway
+                                </button>
+                            </div>
+                        )}
+
+                        {(selectedPaymentType === "cash_on_takeaway" ||
+                            selectedPaymentType === "cash_on_delivery") && (
+                                <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50 p-4">
+                                    <h3 className="text-sm font-bold text-amber-900">
+                                        {formatPaymentType(selectedPaymentType)}
+                                    </h3>
+                                    <p className="mt-1 text-xs leading-5 text-amber-800">
+                                        The selected method allows cash payment. Selecting it
+                                        does not mean that the money has already been received.
+                                    </p>
+                                </div>
+                            )}
+
+                        {paymentError && (
+                            <p
+                                role="alert"
+                                className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700"
+                            >
+                                {paymentError}
+                            </p>
+                        )}
+
+                        {paymentMessage && (
+                            <p className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
+                                {paymentMessage}
+                            </p>
+                        )}
+
+                        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                            <button
+                                type="button"
+                                onClick={() => setPaymentOrder(null)}
+                                className="rounded-lg border border-[#dfe8e2] bg-white px-4 py-3 text-xs font-bold text-[#44564a] hover:bg-[#f5f9f6]"
+                            >
+                                Cancel
+                            </button>
+
+                            {(selectedPaymentType === "cash_on_takeaway" ||
+                                selectedPaymentType === "cash_on_delivery") && (
+                                    <button
+                                        type="button"
+                                        onClick={submitPaymentType}
+                                        disabled={paymentLoading || paymentSaving}
+                                        className="rounded-lg bg-emerald-700 px-4 py-3 text-xs font-extrabold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        {paymentSaving
+                                            ? "Updating..."
+                                            : "Confirm Payment Method"}
+                                    </button>
+                                )}
+                        </div>
+                    </section>
+                </div>
+            )}
         </div>
     );
 }
