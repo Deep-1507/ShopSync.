@@ -421,8 +421,9 @@ export default function UserShell({ children }) {
                 {navItems
                   .flatMap((item) => [item, ...(item.children || [])])
                   .find((item) => item.href === pathname)?.label || "Create Order"}
-                  //this is temp fix we need to find solution asap
+                  
               </span>
+              {/* this is temp fix we need to find solution asap */}
             </div>
           </div>
 
