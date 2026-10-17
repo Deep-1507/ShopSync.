@@ -381,7 +381,7 @@ export async function getOrderByBillNumber(billNumber) {
   return order;
 }
 
-export async function updateOrder(id, body, enterpriseId) {
+export async function updateOrder(id, body) {
   await connectDB();
 
   if (!mongoose.isValidObjectId(id)) fail("Invalid order ID", 400);

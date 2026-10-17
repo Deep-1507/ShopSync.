@@ -1,6 +1,7 @@
 import {userAuthMiddleware} from "../../../../../middlewares/userAuthMiddleware";
 import {enterpriseAuthMiddleware} from "../../../../../middlewares/enterpriseAuthMiddleware";
 import { listOrdersController } from "../../../../../controllers/orderController";
+import Order from "../../../../../models/Order";
 
 export async function GET(request, { params }) {
   const { customerId } = await params;

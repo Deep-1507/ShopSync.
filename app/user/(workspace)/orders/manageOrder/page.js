@@ -94,6 +94,14 @@ export default function ManageOrdersPage() {
     const [dateTo, setDateTo] = useState("");
     const [selectedOrder, setSelectedOrder] = useState(null);
 
+    const [editingOrder, setEditingOrder] = useState(null);
+    const [editProducts, setEditProducts] = useState([]);
+    const [enterpriseProducts, setEnterpriseProducts] = useState([]);
+    const [editLoading, setEditLoading] = useState(false);
+    const [editSaving, setEditSaving] = useState(false);
+    const [editError, setEditError] = useState("");
+    const [deleteLoadingId, setDeleteLoadingId] = useState("");
+
 
     const [paymentOrder, setPaymentOrder] = useState(null);
     const [enterpriseDetails, setEnterpriseDetails] = useState(null);
@@ -103,6 +111,8 @@ export default function ManageOrdersPage() {
     const [paymentSaving, setPaymentSaving] = useState(false);
     const [paymentError, setPaymentError] = useState("");
     const [paymentMessage, setPaymentMessage] = useState("");
+
+    const token = localStorage.getItem("shopsync_user_token");
 
 
     // Pagination state
@@ -403,6 +413,188 @@ export default function ManageOrdersPage() {
         }
     };
 
+    const openEditDialog = async (order) => {
+        setEditingOrder(order);
+        setEditError("");
+        setEditLoading(true);
+        setEnterpriseProducts([]);
+
+        setEditProducts(
+            (order.products || []).map((item) => ({
+                productId:
+                    typeof item.productId === "object"
+                        ? item.productId._id
+                        : item.productId,
+                name:
+                    item.productId?.name ||
+                    item.name ||
+                    "Product",
+                quantity: Number(item.quantity) || 1,
+                unitPrice: Number(item.unitPrice) || 0,
+                discount: Number(item.discount) || 0,
+                taxRate: Number(item.taxRate) || 0,
+            }))
+        );
+
+        try {
+            const enterpriseId = getEnterpriseId(order);
+
+            if (!enterpriseId) {
+                throw new Error("Enterprise ID not found.");
+            }
+
+            const result = await userRequest(
+                `/api/products/allProducts/${encodeURIComponent(enterpriseId)}`
+            );
+
+            const products =
+                Array.isArray(result?.products) ? result.products :
+                    Array.isArray(result?.data?.products) ? result.data.products :
+                        Array.isArray(result?.data) ? result.data :
+                            Array.isArray(result) ? result :
+                                [];
+
+            setEnterpriseProducts(products);
+        } catch (error) {
+            setEditError(error?.message || "Unable to load enterprise products.");
+        } finally {
+            setEditLoading(false);
+        }
+    };
+
+    const addProductToEdit = (product) => {
+        setEditProducts((previous) => {
+            const existing = previous.find(
+                (item) => String(item.productId) === String(product._id)
+            );
+
+            if (existing) {
+                return previous.map((item) =>
+                    String(item.productId) === String(product._id)
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
+                );
+            }
+
+            return [
+                ...previous,
+                {
+                    productId: product._id,
+                    name: product.name,
+                    quantity: 1,
+                    unitPrice: Number(product.price) || 0,
+                    discount: 0,
+                    taxRate: 0,
+                },
+            ];
+        });
+    };
+
+    const changeEditQuantity = (productId, quantity) => {
+        const parsedQuantity = Number(quantity);
+
+        setEditProducts((previous) =>
+            previous.map((item) =>
+                String(item.productId) === String(productId)
+                    ? { ...item, quantity: parsedQuantity }
+                    : item
+            )
+        );
+    };
+
+    const removeEditProduct = (productId) => {
+        setEditProducts((previous) =>
+            previous.filter(
+                (item) => String(item.productId) !== String(productId)
+            )
+        );
+    };
+
+    const saveEditedOrder = async () => {
+        if (!editingOrder?._id) return;
+
+        if (
+            editProducts.length === 0 ||
+            editProducts.some(
+                (item) =>
+                    !Number.isFinite(Number(item.quantity)) ||
+                    Number(item.quantity) <= 0
+            )
+        ) {
+            setEditError("Add at least one product and enter valid quantities.");
+            return;
+        }
+
+        setEditSaving(true);
+        setEditError("");
+
+        try {
+            const products = editProducts.map((item) => ({
+                productId: item.productId,
+                quantity: Number(item.quantity),
+                unitPrice: Number(item.unitPrice),
+                discount: Number(item.discount) || 0,
+                taxRate: Number(item.taxRate) || 0,
+                lineTotal:
+                    Number(item.unitPrice) * Number(item.quantity) -
+                    (Number(item.discount) || 0),
+            }));
+
+            const result = await userRequest(
+                `/api/orders/customer/edit-order/${encodeURIComponent(editingOrder._id)}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ products }),
+                }
+            );
+
+            if (result?.success === false) {
+                throw new Error(result.message || "Unable to update order.");
+            }
+
+            setEditingOrder(null);
+            await loadOrders(currentPage);
+        } catch (error) {
+            setEditError(error?.message || "Unable to update order.");
+        } finally {
+            setEditSaving(false);
+        }
+    };
+
+    const deleteOrder = async (order) => {
+        if (!window.confirm(`Delete order ${order.billNumber || order._id}?`)) {
+            return;
+        }
+
+        setDeleteLoadingId(order._id);
+
+        try {
+            const result = await userRequest(
+                `/api/orders/customer/edit-order/${encodeURIComponent(order._id)}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (result?.success === false) {
+                throw new Error(result.message || "Unable to delete order.");
+            }
+
+            await loadOrders(currentPage);
+        } catch (error) {
+            setError(error?.message || "Unable to delete order.");
+        } finally {
+            setDeleteLoadingId("");
+        }
+    };
 
     function renderBill(order) {
         return (
@@ -743,16 +935,24 @@ export default function ManageOrdersPage() {
                                     <tr key={order._id || order.billNumber}>
                                         <td>
                                             {String(order.orderStatus || "").toLowerCase() === "placed" && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        window.location.href =
-                                                            `/user/orders/editOrder?orderId=${encodeURIComponent(order._id)}`;
-                                                    }}
-                                                    className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-[10px] font-bold text-amber-800 hover:bg-amber-100"
-                                                >
-                                                    Edit Order
-                                                </button>
+                                                <div className="flex flex-wrap gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => openEditDialog(order)}
+                                                        className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-[10px] font-bold text-amber-800 hover:bg-amber-100"
+                                                    >
+                                                        Edit Order
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => deleteOrder(order)}
+                                                        disabled={deleteLoadingId === order._id}
+                                                        className="rounded-md border border-red-200 bg-red-50 px-2.5 py-2 text-[10px] font-bold text-red-700 hover:bg-red-100 disabled:opacity-50"
+                                                    >
+                                                        {deleteLoadingId === order._id ? "Deleting..." : "Delete Order"}
+                                                    </button>
+                                                </div>
                                             )}
 
                                             {String(order.orderStatus || "").toLowerCase() === "confirmed" && (
@@ -1026,7 +1226,7 @@ export default function ManageOrdersPage() {
                                 <span>Customer</span>
                                 <strong>
                                     {selectedOrder.customerId?.name ||
-                                        selectedOrder.customerName ||
+                                        selectedOrder.customerId.name ||
                                         (typeof selectedOrder.customerId ===
                                             "string"
                                             ? selectedOrder.customerId
@@ -1037,14 +1237,21 @@ export default function ManageOrdersPage() {
                             </div>
 
                             <div>
-                                <span>Enterprise ID</span>
+                                <span>Enterprise</span>
                                 <strong>
-                                    {selectedOrder.enterpriseId ||
-                                        selectedOrder.customerName ||
-                                        (typeof selectedOrder.customerId ===
-                                            "string"
-                                            ? selectedOrder.customerId
-                                            : "—")}
+                                    {typeof selectedOrder.enterpriseId === "object"
+                                        ? (
+                                            selectedOrder.enterpriseId?.enterpriseName ||
+                                            selectedOrder.enterpriseId?.name ||
+                                            selectedOrder.enterpriseId?.email ||
+                                            selectedOrder.enterpriseId?._id ||
+                                            "—"
+                                        )
+                                        : (
+                                            selectedOrder.enterpriseId ||
+                                            selectedOrder.customerName ||
+                                            "—"
+                                        )}
                                 </strong>
 
                                 <button
@@ -1271,6 +1478,163 @@ export default function ManageOrdersPage() {
                     ? renderBill(selectedOrder)
                     : filteredOrders.map(renderBill)}
             </section>
+
+            {editingOrder && (
+                <div className="fixed inset-0 z-[1050] flex items-center justify-center overflow-y-auto bg-[#10251bd1] p-3 sm:p-5 print:hidden">
+                    <section
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="edit-order-title"
+                        className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl sm:p-7"
+                    >
+                        <div className="flex items-center justify-between gap-3">
+                            <div>
+                                <h2
+                                    id="edit-order-title"
+                                    className="text-xl font-extrabold text-slate-900"
+                                >
+                                    Edit Order
+                                </h2>
+                                <p className="mt-1 text-xs text-slate-500">
+                                    Bill: {editingOrder.billNumber || "—"}
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => setEditingOrder(null)}
+                                className="rounded-lg border px-3 py-1 text-xl"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        {editError && (
+                            <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                                {editError}
+                            </p>
+                        )}
+
+                        <h3 className="mb-3 mt-6 text-sm font-bold text-slate-800">
+                            Products in this order
+                        </h3>
+
+                        <div className="space-y-3">
+                            {editProducts.map((item) => (
+                                <div
+                                    key={item.productId}
+                                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-3"
+                                >
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-bold text-slate-800">
+                                            {item.name}
+                                        </p>
+                                        <p className="mt-1 text-xs text-slate-500">
+                                            {money(item.unitPrice)} each
+                                        </p>
+                                    </div>
+
+                                    <label className="text-xs text-slate-600">
+                                        Quantity
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={item.quantity}
+                                            onChange={(event) =>
+                                                changeEditQuantity(
+                                                    item.productId,
+                                                    event.target.value
+                                                )
+                                            }
+                                            className="mt-1 block w-24 rounded-lg border border-slate-300 px-2 py-2"
+                                        />
+                                    </label>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => removeEditProduct(item.productId)}
+                                        className="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-700"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+                            ))}
+
+                            {editProducts.length === 0 && (
+                                <p className="rounded-lg bg-slate-50 p-4 text-sm text-slate-500">
+                                    No products in this order. Add a product below.
+                                </p>
+                            )}
+                        </div>
+
+                        <h3 className="mb-3 mt-7 text-sm font-bold text-slate-800">
+                            Add products from this enterprise
+                        </h3>
+
+                        {editLoading ? (
+                            <p className="py-4 text-sm text-slate-500">
+                                Loading enterprise products...
+                            </p>
+                        ) : enterpriseProducts.length === 0 ? (
+                            <p className="py-4 text-sm text-slate-500">
+                                No enterprise products found.
+                            </p>
+                        ) : (
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                {enterpriseProducts.map((product) => {
+                                    const alreadyAdded = editProducts.some(
+                                        (item) =>
+                                            String(item.productId) === String(product._id)
+                                    );
+
+                                    return (
+                                        <div
+                                            key={product._id}
+                                            className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3"
+                                        >
+                                            <div className="min-w-0">
+                                                <p className="truncate text-sm font-bold text-slate-800">
+                                                    {product.name}
+                                                </p>
+                                                <p className="mt-1 text-xs text-slate-500">
+                                                    {money(product.price)}
+                                                </p>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => addProductToEdit(product)}
+                                                className="shrink-0 rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-800"
+                                            >
+                                                {alreadyAdded ? "Add one more" : "Add"}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        <div className="mt-6 flex flex-col-reverse justify-end gap-2 sm:flex-row">
+                            <button
+                                type="button"
+                                onClick={() => setEditingOrder(null)}
+                                className="rounded-lg border border-slate-200 px-4 py-3 text-xs font-bold text-slate-700"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={saveEditedOrder}
+                                disabled={editSaving || editLoading}
+                                className="rounded-lg bg-emerald-700 px-5 py-3 text-xs font-extrabold text-white hover:bg-emerald-800 disabled:opacity-50"
+                            >
+                                {editSaving ? "Saving..." : "Confirm Changes"}
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            )}
 
             {paymentOrder && (
                 <div

@@ -18,6 +18,8 @@ import {
   ChevronDown,
   LogOut,
   HelpCircle,
+  Mail,
+  Phone
 } from "lucide-react";
 
 const navItems = [
@@ -272,16 +274,16 @@ export default function EnterpriseShell({ children }) {
                   <button
                     type="button"
                     className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[13px] font-semibold transition ${active
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
                       }`}
                     onClick={() => toggleDropdown(item)}
                     aria-expanded={isOpen}
                   >
                     <span
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${active
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-slate-100 text-slate-500"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-slate-100 text-slate-500"
                         }`}
                     >
                       <Icon size={18} />
@@ -309,14 +311,14 @@ export default function EnterpriseShell({ children }) {
                             href={child.href}
                             onClick={() => setMobileOpen(false)}
                             className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[11px] transition ${childActive
-                                ? "bg-emerald-50 font-bold text-emerald-700"
-                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                              ? "bg-emerald-50 font-bold text-emerald-700"
+                              : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                               }`}
                           >
                             <span
                               className={`h-1.5 w-1.5 shrink-0 rounded-full ${childActive
-                                  ? "bg-emerald-600"
-                                  : "bg-slate-300"
+                                ? "bg-emerald-600"
+                                : "bg-slate-300"
                                 }`}
                             />
 
@@ -336,14 +338,14 @@ export default function EnterpriseShell({ children }) {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-semibold transition ${active
-                    ? "bg-emerald-50 text-emerald-700"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
                   }`}
               >
                 <span
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition ${active
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-slate-100 text-slate-500"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-slate-100 text-slate-500"
                     }`}
                 >
                   <Icon size={18} />
@@ -362,15 +364,35 @@ export default function EnterpriseShell({ children }) {
               <HelpCircle size={17} />
             </span>
 
+
             <div className="min-w-0">
               <strong className="block truncate text-xs font-bold text-slate-800">
                 Need assistance?
               </strong>
 
               <small className="mt-0.5 block text-[10px] leading-4 text-slate-500">
-                Your workspace is ready.
+                Connect with our technical team.
               </small>
+
+              <div className="mt-2 flex flex-col gap-1.5">
+                <a
+                  href="mailto:support@shopsync.co.in"
+                  className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 transition hover:text-emerald-900"
+                >
+                  <Mail size={13} />
+                  support@shopsync.co.in
+                </a>
+
+                <a
+                  href="tel:+91XXXXXXXXXX"
+                  className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 transition hover:text-emerald-900"
+                >
+                  <Phone size={13} />
+                  +91 XXXXXXXXXX
+                </a>
+              </div>
             </div>
+
           </div>
 
           <button

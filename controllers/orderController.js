@@ -126,10 +126,10 @@ export async function getOrderByBillController(billNumber, actor) {
   }
 }
 
-export async function updateOrderController(request, id, enterpriseId) {
+export async function updateOrderController(request, id) {
   try {
     const body = await request.json();
-    const order = await updateOrder(id, body, enterpriseId);
+    const order = await updateOrder(id, body);
 
     return NextResponse.json({
       success: true,

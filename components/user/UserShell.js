@@ -13,6 +13,8 @@ import {
   ChevronDown,
   LogOut,
   HelpCircle,
+  Mail,
+  Phone
 } from "lucide-react";
 
 import {
@@ -183,9 +185,8 @@ export default function UserShell({ children }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-72 flex-col overflow-hidden border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-72 flex-col overflow-hidden border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         {/* Logo */}
         <Link
@@ -254,20 +255,18 @@ export default function UserShell({ children }) {
                 <div key={item.href}>
                   <button
                     type="button"
-                    className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
-                      active
+                    className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${active
                         ? "bg-blue-50 text-blue-700"
                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
-                    }`}
+                      }`}
                     onClick={() => toggleDropdown(item)}
                     aria-expanded={isOpen}
                   >
                     <span
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                        active
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${active
                           ? "bg-blue-100 text-blue-700"
                           : "bg-slate-100 text-slate-500"
-                      }`}
+                        }`}
                     >
                       <Icon size={18} />
                     </span>
@@ -278,9 +277,8 @@ export default function UserShell({ children }) {
 
                     <ChevronDown
                       size={16}
-                      className={`shrink-0 text-slate-400 transition-transform ${
-                        isOpen ? "rotate-180" : ""
-                      }`}
+                      className={`shrink-0 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
 
@@ -294,18 +292,16 @@ export default function UserShell({ children }) {
                             key={child.href}
                             href={child.href}
                             onClick={() => setMobileOpen(false)}
-                            className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs transition ${
-                              childActive
+                            className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs transition ${childActive
                                 ? "bg-blue-50 font-bold text-blue-700"
                                 : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                            }`}
+                              }`}
                           >
                             <span
-                              className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                                childActive
+                              className={`h-1.5 w-1.5 shrink-0 rounded-full ${childActive
                                   ? "bg-blue-600"
                                   : "bg-slate-300"
-                              }`}
+                                }`}
                             />
 
                             <span className="truncate">
@@ -325,18 +321,16 @@ export default function UserShell({ children }) {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                  active
+                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition ${active
                     ? "bg-blue-50 text-blue-700"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
-                }`}
+                  }`}
               >
                 <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition ${
-                    active
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition ${active
                       ? "bg-blue-100 text-blue-700"
                       : "bg-slate-100 text-slate-500"
-                  }`}
+                    }`}
                 >
                   <Icon size={18} />
                 </span>
@@ -354,15 +348,35 @@ export default function UserShell({ children }) {
               <HelpCircle size={17} />
             </span>
 
+
             <div className="min-w-0">
               <strong className="block truncate text-xs font-bold text-slate-800">
                 Need assistance?
               </strong>
 
               <small className="mt-0.5 block text-[10px] leading-4 text-slate-500">
-                We&apos;re here to help.
+                Connect with our technical team.
               </small>
+
+              <div className="mt-2 flex flex-col gap-1.5">
+                <a
+                  href="mailto:support@shopsync.co.in"
+                  className="flex items-center gap-1.5 text-[11px] font-medium text-blue-700 transition hover:text-blue-900"
+                >
+                  <Mail size={13} />
+                  support@shopsync.co.in
+                </a>
+
+                <a
+                  href="tel:+917005755245"
+                  className="flex items-center gap-1.5 text-[11px] font-medium text-blue-700 transition hover:text-blue-900"
+                >
+                  <Phone size={13} />
+                  +91 7005755245
+                </a>
+              </div>
             </div>
+
           </div>
 
           <button
@@ -455,9 +469,8 @@ export default function UserShell({ children }) {
 
               <ChevronDown
                 size={15}
-                className={`hidden text-slate-400 transition-transform sm:block ${
-                  profileOpen ? "rotate-180" : ""
-                }`}
+                className={`hidden text-slate-400 transition-transform sm:block ${profileOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
 
