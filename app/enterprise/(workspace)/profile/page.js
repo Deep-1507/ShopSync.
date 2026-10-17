@@ -22,6 +22,7 @@ const emptyForm = {
     name: "",
     email: "",
     phone: "",
+    password: "",
     enterpriseName: "",
     category: "type1",
     addressLine: "",
@@ -31,7 +32,9 @@ const emptyForm = {
     landmark: "",
     latitude: "",
     longitude: "",
-    paymentTypes: ["Online", "COD", "COT"],
+    paymentTypes: ["prepaid_online",
+        "cash_on_takeaway",
+        "cash_on_delivery"],
     isAcceptingOnlineOrders: true,
 };
 
@@ -220,6 +223,7 @@ export default function EnterpriseProfilePage() {
             name: enterprise?.name || "",
             email: enterprise?.email || "",
             phone: enterprise?.phone || "",
+            password: "",
             enterpriseName: enterprise?.enterpriseName || "",
             category: enterprise?.category || "type1",
             addressLine: enterprise?.location?.addressLine || "",
@@ -230,9 +234,9 @@ export default function EnterpriseProfilePage() {
             latitude: enterprise?.latitude ?? "",
             longitude: enterprise?.longitude ?? "",
             paymentTypes: enterprise?.paymentTypes || [
-                "Online",
-                "COD",
-                "COT",
+                "prepaid_online",
+                "cash_on_takeaway",
+                "cash_on_delivery"
             ],
             isAcceptingOnlineOrders:
                 enterprise?.isAcceptingOnlineOrders ?? true,
@@ -260,6 +264,7 @@ export default function EnterpriseProfilePage() {
             };
         });
     };
+
 
     const handleUpdate = async (event) => {
         event.preventDefault();
@@ -301,6 +306,11 @@ export default function EnterpriseProfilePage() {
             longitude,
             paymentTypes: form.paymentTypes,
             isAcceptingOnlineOrders: form.isAcceptingOnlineOrders,
+
+            // Include password only when the user enters one.
+            ...(form.password.trim()
+                ? { password: form.password }
+                : {}),
         };
 
         try {
@@ -337,12 +347,21 @@ export default function EnterpriseProfilePage() {
                     },
                 };
 
+            // Never retain the password in the local enterprise profile.
+            delete updatedEnterprise.password;
+
             setEnterprise(updatedEnterprise);
 
             localStorage.setItem(
                 ENTERPRISE_KEY,
                 JSON.stringify(updatedEnterprise)
             );
+
+            // Clear the password after a successful update.
+            setForm((current) => ({
+                ...current,
+                password: "",
+            }));
 
             setShowEditModal(false);
             setNotice("Enterprise profile updated successfully.");
@@ -354,6 +373,7 @@ export default function EnterpriseProfilePage() {
             setSaving(false);
         }
     };
+
 
     const location = enterprise?.location;
 
@@ -446,7 +466,7 @@ export default function EnterpriseProfilePage() {
 
                     <div className="px-5 pb-6 pt-12 sm:px-8 sm:pb-8 sm:pt-14">
                         <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
-                            Enterprise Account
+                            Enterprise Account — Type {enterprise.category?.replace("type", "")}
                         </span>
 
                         <h2 className="mt-4 text-2xl font-bold text-gray-900">
@@ -486,7 +506,11 @@ export default function EnterpriseProfilePage() {
                                 </span>
 
                                 <strong className="block text-sm font-semibold text-gray-900">
-                                    {enterprise.category || "—"}
+                                    {{
+                                        type1: "Local Shop — Store Pickup & Local Visibility",
+                                        type2: "Local Delivery Enterprise",
+                                        type3: "Global Delivery Enterprise",
+                                    }[enterprise.category] || "Category not specified"}
                                 </strong>
                             </div>
 
@@ -508,18 +532,24 @@ export default function EnterpriseProfilePage() {
 
                                 <div className="flex flex-wrap gap-2">
                                     {(enterprise.paymentTypes || []).length > 0 ? (
-                                        enterprise.paymentTypes.map((type) => (
-                                            <span
-                                                key={type}
-                                                className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700"
-                                            >
-                                                {type}
-                                            </span>
-                                        ))
+                                        enterprise.paymentTypes.map((type) => {
+                                            const labels = {
+                                                prepaid_online: "Prepaid Online",
+                                                cash_on_takeaway: "Cash on Takeaway",
+                                                cash_on_delivery: "Cash on Delivery",
+                                            };
+
+                                            return (
+                                                <span
+                                                    key={type}
+                                                    className="inline-flex items-center rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700"
+                                                >
+                                                    {labels[type] || type}
+                                                </span>
+                                            );
+                                        })
                                     ) : (
-                                        <strong className="text-sm font-semibold text-gray-900">
-                                            —
-                                        </strong>
+                                        <strong className="text-sm font-semibold text-gray-400">—</strong>
                                     )}
                                 </div>
                             </div>
@@ -531,8 +561,8 @@ export default function EnterpriseProfilePage() {
 
                                 <strong
                                     className={`block text-sm font-semibold ${enterprise.isAcceptingOnlineOrders
-                                            ? "text-green-700"
-                                            : "text-red-700"
+                                        ? "text-green-700"
+                                        : "text-red-700"
                                         }`}
                                 >
                                     {enterprise.isAcceptingOnlineOrders
@@ -643,6 +673,27 @@ export default function EnterpriseProfilePage() {
 
                                     <label className="flex min-w-0 flex-col gap-1.5">
                                         <span className="text-sm font-semibold text-gray-700">
+                                            New Password
+                                        </span>
+
+                                        <input
+                                            type="password"
+                                            name="password"
+                                            value={form.password}
+                                            onChange={(event) => updateField("password", event.target.value)}
+                                            placeholder="Enter a new password to change it"
+                                            autoComplete="new-password"
+                                            minLength={8}
+                                            className={inputClass}
+                                        />
+
+                                        <span className="text-xs leading-5 text-gray-500">
+                                            Leave blank to keep your current password unchanged.
+                                        </span>
+                                    </label>
+
+                                    <label className="flex min-w-0 flex-col gap-1.5">
+                                        <span className="text-sm font-semibold text-gray-700">
                                             Category <span className="text-red-500">*</span>
                                         </span>
 
@@ -719,7 +770,7 @@ export default function EnterpriseProfilePage() {
                                         </select>
                                     </label>
 
-                                    <label className="flex min-w-0 flex-col gap-1.5">
+                                    {/* <label className="flex min-w-0 flex-col gap-1.5">
                                         <span className="text-sm font-semibold text-gray-700">
                                             Latitude <span className="text-red-500">*</span>
                                         </span>
@@ -757,7 +808,7 @@ export default function EnterpriseProfilePage() {
                                             className={inputClass}
                                             placeholder="Enter longitude"
                                         />
-                                    </label>
+                                    </label> */}
 
                                     <div className="flex flex-col gap-3 sm:col-span-2">
                                         <span className="text-sm font-semibold text-gray-700">
@@ -784,7 +835,7 @@ export default function EnterpriseProfilePage() {
                                         {form.latitude !== "" && form.longitude !== "" && (
                                             <p className="text-xs text-gray-500">
                                                 <MapPin size={13} className="mr-1 inline" />
-                                                Coordinates in the form:{" "}
+                                                Current saved Coordinates:{" "}
                                                 {Number(form.latitude).toFixed(6)},{" "}
                                                 {Number(form.longitude).toFixed(6)}
                                             </p>
@@ -794,8 +845,8 @@ export default function EnterpriseProfilePage() {
                                             <p
                                                 role="status"
                                                 className={`text-xs ${locationMessage.includes("successfully")
-                                                        ? "text-green-600"
-                                                        : "text-red-600"
+                                                    ? "text-green-600"
+                                                    : "text-red-600"
                                                     }`}
                                             >
                                                 {locationMessage}
@@ -808,21 +859,33 @@ export default function EnterpriseProfilePage() {
                                             Accepted Payment Types
                                         </span>
 
-                                        <div className="flex flex-wrap gap-3">
-                                            {["Online", "COD", "COT"].map((paymentType) => (
-                                                <label
-                                                    key={paymentType}
-                                                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-700"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={form.paymentTypes.includes(paymentType)}
-                                                        onChange={() => togglePaymentType(paymentType)}
-                                                        className="h-4 w-4 accent-emerald-600"
-                                                    />
-                                                    {paymentType}
-                                                </label>
-                                            ))}
+                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                            {[
+                                                { value: "prepaid_online", label: "Prepaid Online" },
+                                                { value: "cash_on_takeaway", label: "Cash on Takeaway" },
+                                                { value: "cash_on_delivery", label: "Cash on Delivery" },
+                                            ].map(({ value, label }) => {
+                                                const checked = form.paymentTypes.includes(value);
+
+                                                return (
+                                                    <label
+                                                        key={value}
+                                                        className={`flex min-w-0 cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-3.5 text-sm font-semibold transition-all duration-200 ${checked
+                                                            ? "border-emerald-500 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200"
+                                                            : "border-gray-200 bg-white text-gray-700 hover:border-emerald-300 hover:bg-emerald-50/50"
+                                                            }`}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={form.paymentTypes.includes(value)}
+                                                            onChange={() => togglePaymentType(value)}
+                                                            className="h-4 w-4 shrink-0 cursor-pointer accent-emerald-600"
+                                                        />
+
+                                                        <span className="leading-5">{label}</span>
+                                                    </label>
+                                                );
+                                            })}
                                         </div>
                                     </div>
 

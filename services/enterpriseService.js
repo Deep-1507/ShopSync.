@@ -103,6 +103,14 @@ export async function updateEnterprise(enterpriseId, body) {
   }
 
   const data = enterpriseUpdateValidator.parse(body);
+  console.log(data.password)
+
+  // Hash the password only if the user wants to update it.
+  if (data.password?.trim()) {
+    data.password = await bcrypt.hash(data.password, 12);
+  } else {
+    delete data.password;
+  }
 
   if (data.email || data.phone) {
     const conditions = [];
@@ -143,6 +151,7 @@ export async function updateEnterprise(enterpriseId, body) {
   } catch (error) {
     if (error.code === 11000) {
       const duplicateField = Object.keys(error.keyPattern ?? {})[0];
+
       const duplicateError = new Error(
         duplicateField === "email"
           ? "Email already registered"

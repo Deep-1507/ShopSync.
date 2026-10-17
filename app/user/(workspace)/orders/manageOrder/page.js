@@ -799,11 +799,11 @@ export default function ManageOrdersPage() {
                     <strong>{money(totalRevenue)}</strong>
                     <small>Grand total of filtered orders</small>
                 </div>
-                <div>
+                {/* <div>
                     <span>Payments received</span>
                     <strong>{money(paidAmount)}</strong>
                     <small>Amount paid on filtered orders</small>
-                </div>
+                </div> */}
             </section>
 
             <section className="min-w-0 overflow-hidden rounded-2xl border border-[#e5ece7] bg-white shadow-sm">

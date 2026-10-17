@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Store, Truck, Globe } from "lucide-react";
 
 const enterpriseFeatures = [
   { icon: "▦", title: "Store management", text: "Manage your business from one dashboard." },
@@ -85,8 +86,8 @@ function PortalCard({ type, features, href }) {
         }`}
     >
       <div className={`pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full blur-3xl transition-all duration-700 ${enterprise
-          ? "bg-emerald-100/70 group-hover:bg-emerald-200/80"
-          : "bg-blue-100/70 group-hover:bg-blue-200/80"
+        ? "bg-emerald-100/70 group-hover:bg-emerald-200/80"
+        : "bg-blue-100/70 group-hover:bg-blue-200/80"
         }`} />
 
       <div className="relative flex items-start justify-between gap-4">
@@ -172,7 +173,7 @@ export default function HomePage() {
       </div>
 
       {/* Navbar */}
-      <header className="sticky top-0 z-50 border-b border-blue-100/70 bg-white/80 backdrop-blur-xl">
+      <header className="fixed top-0 inset-x-0 z-50 border-b border-blue-100/70 bg-white/90 backdrop-blur-xl">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-12">
           <Link href="/" className="group flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-2xl text-white shadow-lg shadow-blue-200 transition duration-300 group-hover:rotate-6">
@@ -186,6 +187,12 @@ export default function HomePage() {
           <div className="hidden items-center gap-7 text-sm font-semibold text-slate-600 md:flex">
             <a href="#features" className="transition hover:text-blue-600">Features</a>
             <a href="#how-it-works" className="transition hover:text-blue-600">How it works</a>
+            <a
+              href="#enterprise-types"
+              className="transition hover:text-blue-600"
+            >
+              Enterprise Types
+            </a>
             <a href="#faq" className="transition hover:text-blue-600">FAQs</a>
             <a href="#contact" className="transition hover:text-blue-600">Contact</a>
           </div>
@@ -331,6 +338,103 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Enterprise Types */}
+      <section
+        id="enterprise-types"
+        className="scroll-mt-24 bg-gradient-to-b from-green-50/70 to-white px-5 py-20 sm:px-8 sm:py-24 lg:px-12"
+      >
+        <div className="mx-auto max-w-7xl">
+          <SectionHeading
+            eyebrow="For Every Kind of Business"
+            title="Find Your Place on ShopSync."
+            description="Whether you serve your neighbourhood or customers across the world, ShopSync has a place for your business."
+          />
+
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {/* Type 1 */}
+            <article className="group rounded-3xl border border-green-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-green-100/70 sm:p-8">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-green-100 text-green-700">
+                <Store size={28} strokeWidth={1.8} />
+              </div>
+
+              <p className="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-green-700">
+                Enterprise Type 1
+              </p>
+
+              <h3 className="mt-3 text-xl font-extrabold text-slate-900">
+                Local Shops
+              </h3>
+
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                For local shops that cannot provide delivery. Display your products
+                online so nearby customers can discover them and place orders for
+                pickup or other available arrangements.
+              </p>
+
+              <div className="mt-6 rounded-2xl bg-green-50 p-4">
+                <p className="text-sm font-bold text-green-800">
+                  Your local market, online.
+                </p>
+              </div>
+            </article>
+
+            {/* Type 2 */}
+            <article className="group rounded-3xl border border-blue-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-blue-100/70 sm:p-8">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+                <Truck size={28} strokeWidth={1.8} />
+              </div>
+
+              <p className="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+                Enterprise Type 2
+              </p>
+
+              <h3 className="mt-3 text-xl font-extrabold text-slate-900">
+                Local Delivery Businesses
+              </h3>
+
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                For stores that deliver within their local area. Manage your
+                products and orders, and deliver using your own service or
+                ShopSync&apos;s local delivery service.
+              </p>
+
+              <div className="mt-6 rounded-2xl bg-blue-50 p-4">
+                <p className="text-sm font-bold text-blue-800">
+                  Reach more customers nearby.
+                </p>
+              </div>
+            </article>
+
+            {/* Type 3 */}
+            <article className="group rounded-3xl border border-purple-200 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-purple-100/70 sm:p-8">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 text-purple-700">
+                <Globe size={28} strokeWidth={1.8} />
+              </div>
+
+              <p className="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-purple-700">
+                Enterprise Type 3
+              </p>
+
+              <h3 className="mt-3 text-xl font-extrabold text-slate-900">
+                Global Businesses
+              </h3>
+
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                For businesses that can ship products across regions or nationwide.
+                Showcase your products to customers beyond your local market and
+                manage orders through ShopSync.
+              </p>
+
+              <div className="mt-6 rounded-2xl bg-purple-50 p-4">
+                <p className="text-sm font-bold text-purple-800">
+                  Take your business further.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
       {/* Benefits */}
       <section id="features" className="scroll-mt-24 px-5 py-20 sm:px-8 sm:py-24 lg:px-12">
         <div className="mx-auto max-w-7xl">
@@ -451,6 +555,7 @@ export default function HomePage() {
                   <p className="mt-1 text-sm leading-6 text-blue-100">
                     Send us your questions using your configured support email.
                   </p>
+                  <p>help@shopsync.co.in</p>
                 </div>
               </div>
 
@@ -461,10 +566,10 @@ export default function HomePage() {
                 <div>
                   <p className="font-bold">Our location</p>
                   <p className="mt-1 text-sm leading-6 text-blue-100">
-                    Add your official office address here when it is available.
+                    XYZ Building, Civil Lines
                   </p>
                   <p className="mt-2 text-xs text-blue-200">
-                    No office location has been configured on this page.
+                    Sector-62, Noida, Uttar pradesh
                   </p>
                 </div>
               </div>

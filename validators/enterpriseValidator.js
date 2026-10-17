@@ -2,7 +2,9 @@ import { z } from "zod";
 
 const categorySchema = z.enum(["type1", "type2", "type3"]);
 
-const paymentTypeSchema = z.enum(["Online", "COD", "COT"]);
+const paymentTypeSchema = z.enum(["prepaid_online",
+  "cash_on_takeaway",
+  "cash_on_delivery",]);
 
 const locationSchema = z.object({
   addressLine: z.string().trim().min(1, "Address line is required"),
@@ -36,7 +38,9 @@ export const enterpriseSignupValidator = z.object({
 
   paymentTypes: z
     .array(paymentTypeSchema)
-    .default(["Online", "COD", "COT"]),
+    .default(["prepaid_online",
+      "cash_on_takeaway",
+      "cash_on_delivery",]),
 
   isAcceptingOnlineOrders: z.boolean().default(true),
 
@@ -80,6 +84,9 @@ export const enterpriseUpdateValidator = z
     paymentTypes: z.array(paymentTypeSchema).optional(),
 
     isAcceptingOnlineOrders: z.boolean().optional(),
+
+    // Optional password update
+    password: z.string().trim().min(8).max(128).optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: "At least one field is required for update",

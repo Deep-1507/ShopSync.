@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Order from "../models/Order";
 import Product from "../models/Product";
 import User from "../models/User";
+import Enterprise from "../models/Enterprise";
 import { connectDB } from "../lib/mongodb";
 
 const fail = (message, statusCode) => {
@@ -292,10 +293,10 @@ export async function createOrderByEnterprise(enterpriseId, body) {
     amountPaid: 0,
     balanceDue: grandTotal,
     paymentType,
-    paymentStatus: "pending",
-    orderStatus: "placed",
+    paymentStatus: "paid",
+    orderStatus: "completed",
     billingAddress,
-    notes,
+    notes:"Ordered from Enterprise",
     dueDate,
   });
 

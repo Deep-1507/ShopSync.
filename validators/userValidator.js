@@ -40,21 +40,63 @@ export const signinValidator = z
 
 export const updateUserValidator = z
   .object({
-    email: z.string().trim().email().max(120).transform(
-      (value) => value.toLowerCase()
-    ).optional(),
+    email: z
+      .string()
+      .trim()
+      .email()
+      .max(120)
+      .transform((value) => value.toLowerCase())
+      .optional(),
 
-    phone: z.string().trim().min(1).max(15).optional(),
+    phone: z
+      .string()
+      .trim()
+      .min(1)
+      .max(15)
+      .optional(),
 
-    name: z.string().trim().min(1).max(100).optional(),
+    name: z
+      .string()
+      .trim()
+      .min(1)
+      .max(100)
+      .optional(),
 
     location: locationSchema.partial().optional(),
 
-    latitude: z.number().finite().min(-90).max(90).optional(),
+    latitude: z
+      .number()
+      .finite()
+      .min(-90)
+      .max(90)
+      .optional(),
 
-    longitude: z.number().finite().min(-180).max(180).optional(),
+    longitude: z
+      .number()
+      .finite()
+      .min(-180)
+      .max(180)
+      .optional(),
+
+    // Blank means do not change the existing password.
+    password: z
+      .string()
+      .max(128)
+      .refine(
+        (value) => value.trim() === "" || value.length >= 8,
+        {
+          message: "Password must be at least 8 characters",
+        }
+      )
+      .optional(),
   })
   .strict()
-  .refine((data) => Object.keys(data).length > 0, {
-    message: "At least one field must be provided",
-  });
+  .refine(
+    (data) =>
+      Object.keys(data).some(
+        (key) => key !== "password" || data.password?.trim() !== ""
+      ),
+    {
+      message: "At least one field must be provided",
+    }
+  );

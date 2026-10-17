@@ -1,4 +1,4 @@
- "use client";
+"use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ENTERPRISE_ID, TOKEN_KEY, enterpriseRequest } from "../../../../../lib/enterpriseClient";
 
@@ -28,32 +28,24 @@ const initialBill = () => ({
   // billNumber: makeBillNumber(),
 
   orderType: "Collect from store",
-
   customerId: "",
-
   paymentType: "prepaid",
-
   paymentMethod: "cash",
-
   amountPaid: "",
-
   discount: "0",
-
   taxRate: "0",
-
   shippingCharges: "0",
-
   billingAddress: "",
-
   notes: "",
-
   dueDate: "",
+  paymentStatus:"paid",
+  orderStatus:"completed"
 
 });
 
 
 export default function CreateOrderPage() {
-  
+
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [form, setForm] = useState(initialBill);
@@ -339,14 +331,14 @@ export default function CreateOrderPage() {
     <div className="flex w-full flex-col gap-6 bg-slate-50/70 p-4 sm:p-6 lg:p-8">
 
 
- <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+      <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div className="min-w-0">
           <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-600">
             ORDER MANAGEMENT
           </span>
 
           <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-           Billing counter
+            Billing counter
           </h1>
 
           <p className="mt-1 text-sm text-slate-500">
@@ -358,10 +350,10 @@ export default function CreateOrderPage() {
 
 
 
-     
+
       {(error || notice) && (
 
-        <div className={`mb-4 flex items-center gap-3 rounded-xl border p-3 text-xs [&>span]:grid [&>span]:h-6 [&>span]:w-6 [&>span]:shrink-0 [&>span]:place-items-center [&>span]:rounded-full [&>span]:font-black [&>p]:flex-1 [&>p]:leading-relaxed [&>button]:text-lg ${error ? "border-red-200 bg-red-50 text-red-800" : "border-emerald-200 bg-emerald-50 text-emerald-700"}` } role="status">
+        <div className={`mb-4 flex items-center gap-3 rounded-xl border p-3 text-xs [&>span]:grid [&>span]:h-6 [&>span]:w-6 [&>span]:shrink-0 [&>span]:place-items-center [&>span]:rounded-full [&>span]:font-black [&>p]:flex-1 [&>p]:leading-relaxed [&>button]:text-lg ${error ? "border-red-200 bg-red-50 text-red-800" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`} role="status">
 
           <span>{error ? "!" : "✓"}</span><p>{error || notice}</p>
 
@@ -411,43 +403,43 @@ export default function CreateOrderPage() {
 
           {loading ? <div className="flex min-h-[250px] flex-col items-center justify-center p-6 text-center [&>strong]:text-sm [&>p]:mt-2 [&>p]:max-w-sm [&>p]:text-xs [&>p]:leading-relaxed [&>p]:text-[#8190a8]"><span className="mb-4 h-7 w-7 animate-spin rounded-full border-[3px] border-emerald-100 border-t-emerald-600" /><strong>Loading catalogue</strong><p>Fetching products from your enterprise inventory.</p></div>
 
-          : filteredProducts.length === 0 ? <div className="flex min-h-[250px] flex-col items-center justify-center p-6 text-center [&>strong]:text-sm [&>p]:mt-2 [&>p]:max-w-sm [&>p]:text-xs [&>p]:leading-relaxed [&>p]:text-[#8190a8]"><span>▦</span><strong>No products found</strong><p>Try another search or refresh the catalogue.</p></div>
+            : filteredProducts.length === 0 ? <div className="flex min-h-[250px] flex-col items-center justify-center p-6 text-center [&>strong]:text-sm [&>p]:mt-2 [&>p]:max-w-sm [&>p]:text-xs [&>p]:leading-relaxed [&>p]:text-[#8190a8]"><span>▦</span><strong>No products found</strong><p>Try another search or refresh the catalogue.</p></div>
 
-          : <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+              : <div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
 
-              {filteredProducts.map((product) => {
+                {filteredProducts.map((product) => {
 
-                const inCart = cart.find((item) => item.product._id === product._id);
+                  const inCart = cart.find((item) => item.product._id === product._id);
 
-                const outOfStock = Number(product.stock) <= 0;
+                  const outOfStock = Number(product.stock) <= 0;
 
-                return <article className="min-w-0 overflow-hidden rounded-xl border border-[#e2e8f0] bg-white transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md" key={product._id}>
+                  return <article className="min-w-0 overflow-hidden rounded-xl border border-[#e2e8f0] bg-white transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md" key={product._id}>
 
-                  <button className="relative flex h-32 w-full items-center justify-center overflow-hidden bg-[#f4f7fc] p-4 text-3xl font-extrabold text-emerald-600 sm:h-40 [&>img]:max-h-full [&>img]:max-w-full [&>img]:object-contain" type="button" onClick={() => setSelectedProduct(product)} _aria-label_={`View ${product.name} details`}>
+                    <button className="relative flex h-32 w-full items-center justify-center overflow-hidden bg-[#f4f7fc] p-4 text-3xl font-extrabold text-emerald-600 sm:h-40 [&>img]:max-h-full [&>img]:max-w-full [&>img]:object-contain" type="button" onClick={() => setSelectedProduct(product)} _aria-label_={`View ${product.name} details`}>
 
-                    {product.photo_url ? <img src={product.photo_url} alt={product.name} onError={(e) => { e.currentTarget.style.display = "none"; }} /> : <span>{String(product.name || "P").charAt(0).toUpperCase()}</span>}
+                      {product.photo_url ? <img src={product.photo_url} alt={product.name} onError={(e) => { e.currentTarget.style.display = "none"; }} /> : <span>{String(product.name || "P").charAt(0).toUpperCase()}</span>}
 
-                    <span className={`absolute right-2 top-2 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700 ${outOfStock ? "bg-red-50 text-red-700" : Number(product.stock) < 10 ? "bg-amber-50 text-amber-800" : ""}`}>{outOfStock ? "Out of stock" : `${product.stock} ${product.unit || "units"}`}</span>
+                      <span className={`absolute right-2 top-2 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700 ${outOfStock ? "bg-red-50 text-red-700" : Number(product.stock) < 10 ? "bg-amber-50 text-amber-800" : ""}`}>{outOfStock ? "Out of stock" : `${product.stock} ${product.unit || "units"}`}</span>
 
-                  </button>
+                    </button>
 
-                  <div className="min-w-0 p-3">
+                    <div className="min-w-0 p-3">
 
-                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[10px] text-[#8190a8]"><span>{product.category || "Uncategorised"}</span><span>{product.sku}</span></div>
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[10px] text-[#8190a8]"><span>{product.category || "Uncategorised"}</span><span>{product.sku}</span></div>
 
-                    <button className="block w-full truncate text-left text-sm font-bold text-[#10213f] hover:text-emerald-600" type="button" onClick={() => setSelectedProduct(product)}>{product.name}</button>
+                      <button className="block w-full truncate text-left text-sm font-bold text-[#10213f] hover:text-emerald-600" type="button" onClick={() => setSelectedProduct(product)}>{product.name}</button>
 
-                    <p>{product.brand || "Unbranded"}</p>
+                      <p>{product.brand || "Unbranded"}</p>
 
-                    <div className="mt-3 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center [&>strong]:text-sm [&>strong]:font-extrabold [&>button]:w-full [&>button]:rounded-lg [&>button]:bg-emerald-600 [&>button]:px-3 [&>button]:py-2 [&>button]:text-xs [&>button]:font-bold [&>button]:text-white hover:[&>button]:bg-emerald-700 sm:[&>button]:w-auto [&>button:disabled]:cursor-not-allowed [&>button:disabled]:bg-[#a9c5ff]"><strong>{money(product.price)}</strong><button type="button" disabled={outOfStock || (inCart && inCart.quantity >= Number(product.stock))} onClick={() => addToCart(product)}>{inCart ? `Added · ${inCart.quantity}` : "+ Add"}</button></div>
+                      <div className="mt-3 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center [&>strong]:text-sm [&>strong]:font-extrabold [&>button]:w-full [&>button]:rounded-lg [&>button]:bg-emerald-600 [&>button]:px-3 [&>button]:py-2 [&>button]:text-xs [&>button]:font-bold [&>button]:text-white hover:[&>button]:bg-emerald-700 sm:[&>button]:w-auto [&>button:disabled]:cursor-not-allowed [&>button:disabled]:bg-[#a9c5ff]"><strong>{money(product.price)}</strong><button type="button" disabled={outOfStock || (inCart && inCart.quantity >= Number(product.stock))} onClick={() => addToCart(product)}>{inCart ? `Added · ${inCart.quantity}` : "+ Add"}</button></div>
 
-                  </div>
+                    </div>
 
-                </article>;
+                  </article>;
 
-              })}
+                })}
 
-            </div>}
+              </div>}
 
         </section>
 
@@ -493,7 +485,15 @@ export default function CreateOrderPage() {
 
           </div>
 
-          <button className="flex items-center justify-center gap-3 rounded-lg bg-emerald-600 px-4 py-3 text-xs font-extrabold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-[#a9c5ff] [&>span]:text-lg" type="button" disabled={!cart.length} onClick={() => setShowCheckout(true)}>Continue to checkout <span>→</span></button>
+          <button
+            className="flex w-full items-center justify-center gap-3 rounded-lg bg-emerald-600 px-4 py-3 text-xs font-extrabold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300 [&>span]:text-lg"
+            type="button"
+            disabled={!cart.length}
+            onClick={() => setShowCheckout(true)}
+          >
+            Continue to checkout
+            <span>→</span>
+          </button>
 
           <p className="mx-4 mb-4 mt-3 text-center text-[10px] text-[#8190a8] [&>span]:mr-1 [&>span]:text-emerald-600"><span>✓</span> Bill is submitted to your authenticated enterprise.</p>
 
@@ -503,7 +503,7 @@ export default function CreateOrderPage() {
 
 
 
-      {selectedProduct && <div className="fixed inset-0 z-[1000] flex items-center justify-center overflow-auto bg-[#14284bd1] p-2 sm:p-5" onMouseDown={(e) => { if (e.target === e.currentTarget) setSelectedProduct(null); }}>
+      {selectedProduct && <div className="fixed inset-0 z-[1000] flex items-center justify-center overflow-auto bg-[#1b4d29d1] p-2 sm:p-5" onMouseDown={(e) => { if (e.target === e.currentTarget) setSelectedProduct(null); }}>
 
         <section className="relative max-h-[calc(100vh-20px)] w-full max-w-[780px] overflow-auto rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-2xl sm:max-h-[calc(100vh-44px)] sm:p-7 product-detail-modal" role="dialog" _aria-modal_="true" _aria-labelledby_="product-detail-title">
 
@@ -523,7 +523,7 @@ export default function CreateOrderPage() {
 
 
 
-      {showCart && <div className="fixed inset-0 z-[1000] flex items-center justify-center overflow-auto bg-[#14284bd1] p-2 sm:p-5" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowCart(false); }}>
+      {showCart && <div className="fixed inset-0 z-[1000] flex items-center justify-center overflow-auto bg-[#1b4d29d1] p-2 sm:p-5" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowCart(false); }}>
 
         <section className="relative max-h-[calc(100vh-20px)] w-full max-w-[780px] overflow-auto rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-2xl sm:max-h-[calc(100vh-44px)] sm:p-7 max-w-[650px]" role="dialog" _aria-modal_="true" _aria-labelledby_="cart-modal-title">
 
@@ -538,54 +538,262 @@ export default function CreateOrderPage() {
       </div>}
 
 
+      {showCheckout && (
+        <div
+          className="fixed inset-0 z-[1000] flex items-start justify-center overflow-y-auto bg-[#1b4d29d1] p-3 sm:items-center sm:p-5"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !submitting) {
+              setShowCheckout(false);
+            }
+          }}
+        >
+          <section
+            className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl overflow-y-auto overscroll-contain rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-2xl sm:max-h-[calc(100dvh-2.5rem)] sm:p-6 lg:p-7"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="checkout-title"
+          >
+            {/* Close button */}
+            <button
+              className="absolute right-4 top-4 z-10 grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[#e2e8f0] bg-white text-xl text-[#526582] transition hover:bg-[#f4f7fc] disabled:opacity-50 sm:right-6 sm:top-6"
+              type="button"
+              onClick={() => setShowCheckout(false)}
+              disabled={submitting}
+              aria-label="Close"
+            >
+              ×
+            </button>
 
-      {showCheckout && <div className="fixed inset-0 z-[1000] flex items-center justify-center overflow-auto bg-[#14284bd1] p-2 sm:p-5 checkout-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget && !submitting) setShowCheckout(false); }}>
+            {/* Header */}
+            <div className="mb-6 pr-12 sm:mb-7">
+              <span className="mb-2 block text-[10px] font-extrabold tracking-[0.13em] text-emerald-600">
+                FINALISE TRANSACTION
+              </span>
 
-        <section className="relative max-h-[calc(100vh-20px)] w-full max-w-[780px] overflow-auto rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-2xl sm:max-h-[calc(100vh-44px)] sm:p-7 max-w-[760px]" role="dialog" _aria-modal_="true" _aria-labelledby_="checkout-title">
+              <h2
+                id="checkout-title"
+                className="text-2xl font-extrabold tracking-tight text-[#10213f] sm:text-3xl"
+              >
+                Create bill
+              </h2>
 
-          <button className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-lg border border-[#e2e8f0] bg-white text-xl text-[#526582] hover:bg-[#f4f7fc]" type="button" onClick={() => setShowCheckout(false)} disabled={submitting} _aria-label_="Close">×</button>
-
-          <div className="mb-5 [&>h2]:text-2xl [&>h2]:font-extrabold [&>p]:mt-2 [&>p]:text-xs [&>p]:text-[#8190a8]"><span className="mb-2 block text-[10px] font-extrabold tracking-[0.13em] text-emerald-600">FINALISE TRANSACTION</span><h2 id="checkout-title">Create bill</h2><p>Enter customer and payment details, then confirm the order.</p></div>
-
-          <form onSubmit={createBill}>
-
-            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-
-              {/* <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-emerald-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal">Bill number<input name="billNumber" value={form.billNumber} onChange={updateForm} required /></label> */}
-
-              <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-emerald-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal">Customer ID <span className="inline text-red-600">*</span><input name="customerId" value={form.customerId} onChange={updateForm} placeholder="MongoDB customer ObjectId" required /></label>
-
-              <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-emerald-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal">Order type<select name="orderType" value={form.orderType} onChange={updateForm}><option>Collect from store</option><option>Local Delivery</option><option>Global Delivery</option></select></label>
-
-              <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-emerald-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal">Payment type<select name="paymentType" value={form.paymentType} onChange={(e) => { updateForm(e); if (e.target.value === "prepaid") setForm((current) => ({ ...current, paymentType: e.target.value, amountPaid: String(grandTotal) })); }}><option value="prepaid">Prepaid</option><option value="postpaid">Postpaid</option><option value="cashondelivery">Cash on delivery</option></select></label>
-
-              <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-emerald-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal">Payment method<select name="paymentMethod" value={form.paymentMethod} onChange={updateForm}><option value="cash">Cash</option><option value="upi">UPI</option><option value="card">Card</option><option value="net_banking">Net banking</option><option value="bank_transfer">Bank transfer</option><option value="wallet">Wallet</option><option value="cheque">Cheque</option><option value="cashondelivery">Cash on delivery</option><option value="other">Other</option></select></label>
-
-              <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-emerald-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal">Amount paid (₹)<input name="amountPaid" type="number" min="0" step="0.01" value={form.amountPaid === "" && form.paymentType === "prepaid" ? grandTotal.toFixed(2) : form.amountPaid} onChange={updateForm} /></label>
-
-              <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-emerald-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal">Bill discount (₹)<input name="discount" type="number" min="0" max={subtotal} step="0.01" value={form.discount} onChange={updateForm} /></label>
-
-              <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-emerald-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal">Tax rate (%)<input name="taxRate" type="number" min="0" max="100" step="0.01" value={form.taxRate} onChange={updateForm} /></label>
-
-              <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-emerald-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal">Shipping charges (₹)<input name="shippingCharges" type="number" min="0" step="0.01" value={form.shippingCharges} onChange={updateForm} /></label>
-
-              <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-emerald-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal">Due date<input name="dueDate" type="date" value={form.dueDate} onChange={updateForm} /></label>
-
-              <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-emerald-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal sm:col-span-2">Billing address<input name="billingAddress" value={form.billingAddress} onChange={updateForm} placeholder="Customer billing address" /></label>
-
-              <label className="flex min-w-0 flex-col gap-2 text-[11px] font-bold text-[#344563] [&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3 [&>input]:py-2.5 [&>input]:text-sm [&>input]:font-normal [&>input]:outline-none focus-within:[&>input]:border-emerald-600 [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3 [&>select]:py-2.5 [&>select]:text-sm [&>select]:font-normal [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:px-3 [&>textarea]:py-2.5 [&>textarea]:text-sm [&>textarea]:font-normal sm:col-span-2">Notes<textarea name="notes" value={form.notes} onChange={updateForm} rows={2} placeholder="Special instructions or notes..." /></label>
-
+              <p className="mt-2 text-sm leading-5 text-[#8190a8]">
+                Enter customer and payment details, then confirm the order.
+              </p>
             </div>
 
-            <div className="mt-5 grid grid-cols-1 gap-3 rounded-xl bg-[#f4f7fc] p-3.5 sm:grid-cols-3 [&_span]:block [&_span]:text-[10px] [&_span]:text-[#7d8a81] [&_strong]:mt-1.5 [&_strong]:block [&_strong]:text-base [&_strong]:text-[#10213f] [&>div:first-child_strong]:text-emerald-600"><div><span>Grand total</span><strong>{money(grandTotal)}</strong></div><div><span>Amount paid</span><strong>{money(Math.min(grandTotal, amountPaid))}</strong></div><div><span>Balance due</span><strong>{money(balanceDue)}</strong></div></div>
+            {/* Form */}
+            <form onSubmit={createBill} className="space-y-5">
+              <div className="grid min-w-0 grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2">
+               
+                {/* Customer ID */}
+                <label className="flex min-w-0 flex-col gap-2 text-xs font-bold text-[#344563] [&>input]:w-full [&>input]:min-w-0 [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3.5 [&>input]:py-3 [&>input]:text-sm [&>input]:font-normal [&>input]:text-[#10213f] [&>input]:outline-none [&>input]:transition [&>input]:placeholder:text-[#94a3b8] focus-within:[&>input]:border-emerald-500 focus-within:[&>input]:ring-2 focus-within:[&>input]:ring-emerald-100">
+                  <span>
+                    Customer ID <span className="text-red-600">*</span>
+                  </span>
 
-            <div className="mt-5 flex flex-col-reverse justify-end gap-2.5 sm:flex-row"><button type="button" className="rounded-lg border border-[#dce5f2] bg-white px-4 py-3 text-xs font-bold text-[#344563] hover:bg-[#f4f7fc] disabled:opacity-50" disabled={submitting} onClick={() => setShowCheckout(false)}>Back to counter</button><button type="submit" className="flex w-full items-center justify-center gap-3 rounded-lg bg-emerald-600 px-4 py-3 text-xs font-extrabold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-[#a9c5ff] [&>span]:text-lg" disabled={submitting || !cart.length}>{submitting ? "Creating bill..." : "Confirm & create bill"} <span>→</span></button></div>
+                  <input
+                    name="customerId"
+                    value={form.customerId}
+                    onChange={updateForm}
+                    placeholder="MongoDB customer ObjectId"
+                    required
+                  />
+                </label>
 
-          </form>
+                {/* Order type */}
+                <label className="flex min-w-0 flex-col gap-2 text-xs font-bold text-[#344563] [&>select]:w-full [&>select]:min-w-0 [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3.5 [&>select]:py-3 [&>select]:text-sm [&>select]:font-normal [&>select]:text-[#10213f] [&>select]:outline-none [&>select]:transition focus-within:[&>select]:border-emerald-500 focus-within:[&>select]:ring-2 focus-within:[&>select]:ring-emerald-100">
+                  Order type
+                  <select
+                    name="orderType"
+                    value={form.orderType}
+                    onChange={updateForm}
+                  >
+                    <option>Collect from store</option>
+                    <option>Local Delivery</option>
+                    <option>Global Delivery</option>
+                  </select>
+                </label>
 
-        </section>
+                {/* Payment type */}
+                <label className="flex min-w-0 flex-col gap-2 text-xs font-bold text-[#344563] [&>select]:w-full [&>select]:min-w-0 [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3.5 [&>select]:py-3 [&>select]:text-sm [&>select]:font-normal [&>select]:text-[#10213f] [&>select]:outline-none [&>select]:transition focus-within:[&>select]:border-emerald-500 focus-within:[&>select]:ring-2 focus-within:[&>select]:ring-emerald-100">
+                  Payment type
+                  <select
+                    name="paymentType"
+                    value={form.paymentType}
+                    onChange={(e) => {
+                      updateForm(e);
 
-      </div>}
+                      if (e.target.value === "prepaid") {
+                        setForm((current) => ({
+                          ...current,
+                          paymentType: e.target.value,
+                          amountPaid: String(grandTotal),
+                        }));
+                      }
+                    }}
+                  >
+                    <option value="prepaid">Prepaid</option>
+                    <option value="postpaid">Postpaid</option>
+                    <option value="cashondelivery">Cash on delivery</option>
+                  </select>
+                </label>
+
+                {/* Payment method */}
+                <label className="flex min-w-0 flex-col gap-2 text-xs font-bold text-[#344563] [&>select]:w-full [&>select]:min-w-0 [&>select]:rounded-lg [&>select]:border [&>select]:border-[#dce5f2] [&>select]:bg-white [&>select]:px-3.5 [&>select]:py-3 [&>select]:text-sm [&>select]:font-normal [&>select]:text-[#10213f] [&>select]:outline-none [&>select]:transition focus-within:[&>select]:border-emerald-500 focus-within:[&>select]:ring-2 focus-within:[&>select]:ring-emerald-100">
+                  Payment method
+                  <select
+                    name="paymentMethod"
+                    value={form.paymentMethod}
+                    onChange={updateForm}
+                  >
+                    <option value="cash">Cash</option>
+                    <option value="upi">UPI</option>
+                    <option value="card">Card</option>
+                    <option value="net_banking">Net banking</option>
+                    <option value="bank_transfer">Bank transfer</option>
+                    <option value="wallet">Wallet</option>
+                    <option value="cheque">Cheque</option>
+                    <option value="cashondelivery">Cash on delivery</option>
+                    <option value="other">Other</option>
+                  </select>
+                </label>
+
+                {/* Amount paid */}
+                <label className="flex min-w-0 flex-col gap-2 text-xs font-bold text-[#344563] [&>input]:w-full [&>input]:min-w-0 [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3.5 [&>input]:py-3 [&>input]:text-sm [&>input]:font-normal [&>input]:text-[#10213f] [&>input]:outline-none [&>input]:transition focus-within:[&>input]:border-emerald-500 focus-within:[&>input]:ring-2 focus-within:[&>input]:ring-emerald-100">
+                  Amount paid (₹)
+                  <input
+                    name="amountPaid"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={
+                      form.amountPaid === "" && form.paymentType === "prepaid"
+                        ? grandTotal.toFixed(2)
+                        : form.amountPaid
+                    }
+                    onChange={updateForm}
+                  />
+                </label>
+
+                {/* Discount */}
+                <label className="flex min-w-0 flex-col gap-2 text-xs font-bold text-[#344563] [&>input]:w-full [&>input]:min-w-0 [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3.5 [&>input]:py-3 [&>input]:text-sm [&>input]:font-normal [&>input]:text-[#10213f] [&>input]:outline-none [&>input]:transition focus-within:[&>input]:border-emerald-500 focus-within:[&>input]:ring-2 focus-within:[&>input]:ring-emerald-100">
+                  Bill discount (₹)
+                  <input
+                    name="discount"
+                    type="number"
+                    min="0"
+                    max={subtotal}
+                    step="0.01"
+                    value={form.discount}
+                    onChange={updateForm}
+                  />
+                </label>
+
+                {/* Tax rate */}
+                <label className="flex min-w-0 flex-col gap-2 text-xs font-bold text-[#344563] [&>input]:w-full [&>input]:min-w-0 [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3.5 [&>input]:py-3 [&>input]:text-sm [&>input]:font-normal [&>input]:text-[#10213f] [&>input]:outline-none [&>input]:transition focus-within:[&>input]:border-emerald-500 focus-within:[&>input]:ring-2 focus-within:[&>input]:ring-emerald-100">
+                  Tax rate (%)
+                  <input
+                    name="taxRate"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={form.taxRate}
+                    onChange={updateForm}
+                  />
+                </label>
+
+                {/* Shipping charges */}
+                <label className="flex min-w-0 flex-col gap-2 text-xs font-bold text-[#344563] [&>input]:w-full [&>input]:min-w-0 [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3.5 [&>input]:py-3 [&>input]:text-sm [&>input]:font-normal [&>input]:text-[#10213f] [&>input]:outline-none [&>input]:transition focus-within:[&>input]:border-emerald-500 focus-within:[&>input]:ring-2 focus-within:[&>input]:ring-emerald-100">
+                  Shipping charges (₹)
+                  <input
+                    name="shippingCharges"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.shippingCharges}
+                    onChange={updateForm}
+                  />
+                </label>
+
+                {/* Due date */}
+                {/* <label className="flex min-w-0 flex-col gap-2 text-xs font-bold text-[#344563] [&>input]:w-full [&>input]:min-w-0 [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3.5 [&>input]:py-3 [&>input]:text-sm [&>input]:font-normal [&>input]:text-[#10213f] [&>input]:outline-none [&>input]:transition focus-within:[&>input]:border-emerald-500 focus-within:[&>input]:ring-2 focus-within:[&>input]:ring-emerald-100">
+                  Due date
+                  <input
+                    name="dueDate"
+                    type="date"
+                    value={form.dueDate}
+                    onChange={updateForm}
+                  />
+                </label> */}
+
+                {/* Billing address */}
+                <label className="flex min-w-0 flex-col gap-2 text-xs font-bold text-[#344563] sm:col-span-2 [&>input]:w-full [&>input]:min-w-0 [&>input]:rounded-lg [&>input]:border [&>input]:border-[#dce5f2] [&>input]:bg-white [&>input]:px-3.5 [&>input]:py-3 [&>input]:text-sm [&>input]:font-normal [&>input]:text-[#10213f] [&>input]:outline-none [&>input]:transition [&>input]:placeholder:text-[#94a3b8] focus-within:[&>input]:border-emerald-500 focus-within:[&>input]:ring-2 focus-within:[&>input]:ring-emerald-100">
+                  Billing address
+                  <input
+                    name="billingAddress"
+                    value={form.billingAddress}
+                    onChange={updateForm}
+                    placeholder="Customer billing address"
+                  />
+                </label>
+
+                {/* Notes */}
+                {/* <label className="flex min-w-0 flex-col gap-2 text-xs font-bold text-[#344563] sm:col-span-2 [&>textarea]:w-full [&>textarea]:min-w-0 [&>textarea]:resize-y [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-[#dce5f2] [&>textarea]:bg-white [&>textarea]:px-3.5 [&>textarea]:py-3 [&>textarea]:text-sm [&>textarea]:font-normal [&>textarea]:text-[#10213f] [&>textarea]:outline-none [&>textarea]:transition [&>textarea]:placeholder:text-[#94a3b8] focus-within:[&>textarea]:border-emerald-500 focus-within:[&>textarea]:ring-2 focus-within:[&>textarea]:ring-emerald-100">
+                  Notes
+                  <textarea
+                    name="notes"
+                    value={form.notes}
+                    onChange={updateForm}
+                    rows={3}
+                    placeholder="Special instructions or notes..."
+                  />
+                </label> */}
+              </div>
+
+              {/* Bill totals */}
+              <div className="grid grid-cols-1 gap-4 rounded-xl border border-[#e2e8f0] bg-[#f4f7fc] p-4 sm:grid-cols-3 sm:gap-3 [&_span]:block [&_span]:text-[11px] [&_span]:text-[#7d8a9e] [&_strong]:mt-1.5 [&_strong]:block [&_strong]:break-words [&_strong]:text-base [&_strong]:text-[#10213f] [&>div:first-child_strong]:text-emerald-600">
+                <div>
+                  <span>Grand total</span>
+                  <strong>{money(grandTotal)}</strong>
+                </div>
+
+                <div>
+                  <span>Amount paid</span>
+                  <strong>{money(Math.min(grandTotal, amountPaid))}</strong>
+                </div>
+
+                <div>
+                  <span>Balance due</span>
+                  <strong>{money(balanceDue)}</strong>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-col-reverse gap-3 border-t border-[#e2e8f0] pt-4 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  className="w-full rounded-lg border border-[#dce5f2] bg-white px-5 py-3 text-sm font-bold text-[#344563] transition hover:bg-[#f4f7fc] disabled:opacity-50 sm:w-auto"
+                  disabled={submitting}
+                  onClick={() => setShowCheckout(false)}
+                >
+                  Back to counter
+                </button>
+
+                <button
+                  type="submit"
+                  className="flex w-full items-center justify-center gap-3 rounded-lg bg-emerald-600 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300 sm:w-auto"
+                  disabled={submitting || !cart.length}
+                >
+                  {submitting ? "Creating bill..." : "Confirm & create bill"}
+                  <span className="text-lg">→</span>
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

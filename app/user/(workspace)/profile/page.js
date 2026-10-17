@@ -19,6 +19,7 @@ const emptyForm = {
   name: "",
   email: "",
   phone: "",
+  password: "",
   addressLine: "",
   district: "",
   state: "",
@@ -195,6 +196,7 @@ export default function EnterpriseProfilePage() {
       name: user?.name || "",
       email: user?.email || "",
       phone: user?.phone || "",
+      password: "",
       addressLine: user?.location?.addressLine || "",
       district: user?.location?.district || "",
       state: user?.location?.state || "",
@@ -240,6 +242,7 @@ export default function EnterpriseProfilePage() {
       name: form.name.trim(),
       email: form.email.trim(),
       phone: form.phone.trim(),
+      password: form.password.trim(),
       location: {
         addressLine: form.addressLine.trim(),
         district: form.district.trim(),
@@ -266,21 +269,21 @@ export default function EnterpriseProfilePage() {
 
       const updatedUser = responseUser
         ? {
-            ...user,
-            ...responseUser,
-            location: {
-              ...(user?.location || {}),
-              ...(responseUser.location || {}),
-            },
-          }
+          ...user,
+          ...responseUser,
+          location: {
+            ...(user?.location || {}),
+            ...(responseUser.location || {}),
+          },
+        }
         : {
-            ...user,
-            ...payload,
-            location: {
-              ...(user?.location || {}),
-              ...payload.location,
-            },
-          };
+          ...user,
+          ...payload,
+          location: {
+            ...(user?.location || {}),
+            ...payload.location,
+          },
+        };
 
       setUser(updatedUser);
       localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
@@ -299,14 +302,14 @@ export default function EnterpriseProfilePage() {
   const locationText =
     location && typeof location === "object"
       ? [
-          location.addressLine,
-          location.landmark,
-          location.district,
-          location.state,
-          location.pinCode,
-        ]
-          .filter(Boolean)
-          .join(", ")
+        location.addressLine,
+        location.landmark,
+        location.district,
+        location.state,
+        location.pinCode,
+      ]
+        .filter(Boolean)
+        .join(", ")
       : typeof location === "string"
         ? location
         : "";
@@ -353,10 +356,9 @@ export default function EnterpriseProfilePage() {
         </button>
       </section>
 
-
       {error && !showEditModal && (
         <div
-          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+          className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700"
           role="alert"
         >
           {error}
@@ -374,8 +376,8 @@ export default function EnterpriseProfilePage() {
 
       {user && (
         <section className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-          <div className="flex h-28 items-end bg-gradient-to-r from-red-700 via-[#ed1c24] to-rose-500 px-6 sm:h-36">
-            <div className="mb-0 flex h-20 w-20 translate-y-1/2 items-center justify-center rounded-2xl border-4 border-white bg-red-50 text-[#ed1c24] shadow-md sm:h-24 sm:w-24">
+          <div className="flex h-28 items-end bg-gradient-to-r from-blue-700 via-[#173ae7] to-blue-500 px-6 sm:h-36">
+            <div className="mb-0 flex h-20 w-20 translate-y-1/2 items-center justify-center rounded-2xl border-4 border-white bg-blue-50 text-[#173ae7] shadow-md sm:h-24 sm:w-24">
               {user.name?.charAt(0)?.toUpperCase() || (
                 <UserRound size={36} />
               )}
@@ -383,7 +385,7 @@ export default function EnterpriseProfilePage() {
           </div>
 
           <div className="px-5 pb-6 pt-12 sm:px-8 sm:pb-8 sm:pt-14">
-            <span className="inline-flex rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-[#ed1c24]">
+            <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#173ae7]">
               Customer Account
             </span>
 
@@ -496,7 +498,7 @@ export default function EnterpriseProfilePage() {
                 {error && (
                   <div
                     role="alert"
-                    className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                    className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700"
                   >
                     {error}
                   </div>
@@ -521,7 +523,7 @@ export default function EnterpriseProfilePage() {
                         <span className="text-sm font-semibold text-gray-700">
                           {field.label}
                           {field.required && (
-                            <span className="text-red-500"> *</span>
+                            <span className="text-blue-500"> *</span>
                           )}
                         </span>
 
@@ -542,7 +544,7 @@ export default function EnterpriseProfilePage() {
                   {/* State dropdown */}
                   <label className="flex min-w-0 flex-col gap-1.5">
                     <span className="text-sm font-semibold text-gray-700">
-                      State <span className="text-red-500">*</span>
+                      State <span className="text-blue-500">*</span>
                     </span>
 
                     <select
@@ -600,6 +602,28 @@ export default function EnterpriseProfilePage() {
                     </select>
                   </label>
 
+                  {/* New Password */}
+                  <label className="flex min-w-0 flex-col gap-1.5 sm:col-span-2">
+                    <span className="text-sm font-semibold text-gray-700">
+                      New Password
+                    </span>
+
+                    <input
+                      type="password"
+                      value={form.password}
+                      minLength={8}
+                      maxLength={128}
+                      autoComplete="new-password"
+                      onChange={(event) => updateField("password", event.target.value)}
+                      className={inputClass}
+                      placeholder="Leave blank to keep your current password"
+                    />
+
+                    <span className="text-xs text-gray-500">
+                      Enter at least 8 characters only if you want to change your password.
+                    </span>
+                  </label>
+
                   {/* Precise location button */}
                   <div className="flex flex-col gap-2 sm:col-span-2">
                     <span className="text-sm font-semibold text-gray-700">
@@ -630,7 +654,7 @@ export default function EnterpriseProfilePage() {
                       form.longitude !== "" && (
                         <p className="text-xs text-gray-500">
                           <MapPin size={13} className="mr-1 inline" />
-                          Coordinates saved in the form:{" "}
+                          Current saved Coordinates{" "}
                           {Number(form.latitude).toFixed(6)},{" "}
                           {Number(form.longitude).toFixed(6)}
                         </p>
@@ -639,11 +663,10 @@ export default function EnterpriseProfilePage() {
                     {locationMessage && (
                       <p
                         role="status"
-                        className={`text-xs ${
-                          locationMessage.includes("successfully")
+                        className={`text-xs ${locationMessage.includes("successfully")
                             ? "text-green-600"
                             : "text-red-600"
-                        }`}
+                          }`}
                       >
                         {locationMessage}
                       </p>

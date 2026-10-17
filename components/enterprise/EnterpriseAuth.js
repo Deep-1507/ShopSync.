@@ -8,6 +8,7 @@ import {
   ENTERPRISE_ID,
 } from "../../lib/enterpriseClient";
 import indiaData from "../../lib/indiaStatesDistricts.json";
+import { MapPin } from "lucide-react";
 
 const initialSignup = {
   name: "",
@@ -23,8 +24,8 @@ const initialSignup = {
     pinCode: "",
     landmark: "",
   },
-  paymentTypes: ["Online", "COD", "COT"],
-  isAcceptingOnlineOrders: true,
+  paymentTypes: [],
+  isAcceptingOnlineOrders: false,
 };
 
 const inputClass =
@@ -140,6 +141,16 @@ export default function EnterpriseAuth() {
 
     if (loading) return;
 
+    // Signup is allowed only on the final step.
+    if (mode === "signup" && signupStep !== 3) {
+      return;
+    }
+
+    if (mode === "signup" && signup.paymentTypes.length === 0) {
+      setError("Please select at least one payment method.");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -154,15 +165,15 @@ export default function EnterpriseAuth() {
 
       const body = isSignup
         ? {
-            ...signup,
-            email: signup.email.trim(),
-            latitude: coordinates.latitude,
-            longitude: coordinates.longitude,
-          }
+          ...signup,
+          email: signup.email.trim(),
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude,
+        }
         : {
-            ...signin,
-            email: signin.email.trim(),
-          };
+          ...signin,
+          email: signin.email.trim(),
+        };
 
       const response = await fetch(
         isSignup
@@ -396,11 +407,10 @@ export default function EnterpriseAuth() {
           <div className="mt-7 grid grid-cols-2 rounded-xl bg-slate-100 p-1">
             <button
               type="button"
-              className={`rounded-lg px-4 py-3 text-sm font-bold transition ${
-                mode === "signin"
-                  ? "bg-white text-emerald-700 shadow-sm"
-                  : "text-slate-500 hover:text-slate-900"
-              }`}
+              className={`rounded-lg px-4 py-3 text-sm font-bold transition ${mode === "signin"
+                ? "bg-white text-emerald-700 shadow-sm"
+                : "text-slate-500 hover:text-slate-900"
+                }`}
               onClick={() => changeMode("signin")}
             >
               Sign in
@@ -408,11 +418,10 @@ export default function EnterpriseAuth() {
 
             <button
               type="button"
-              className={`rounded-lg px-4 py-3 text-sm font-bold transition ${
-                mode === "signup"
-                  ? "bg-white text-emerald-700 shadow-sm"
-                  : "text-slate-500 hover:text-slate-900"
-              }`}
+              className={`rounded-lg px-4 py-3 text-sm font-bold transition ${mode === "signup"
+                ? "bg-white text-emerald-700 shadow-sm"
+                : "text-slate-500 hover:text-slate-900"
+                }`}
               onClick={() => changeMode("signup")}
             >
               Sign up
@@ -514,13 +523,12 @@ export default function EnterpriseAuth() {
                     {signupSteps.map((step) => (
                       <span
                         key={step.number}
-                        className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
-                          signupStep === step.number
-                            ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
-                            : signupStep > step.number
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-slate-100 text-slate-400"
-                        }`}
+                        className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${signupStep === step.number
+                          ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
+                          : signupStep > step.number
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-slate-100 text-slate-400"
+                          }`}
                       >
                         {signupStep > step.number ? "✓" : step.number}
                       </span>
@@ -543,11 +551,10 @@ export default function EnterpriseAuth() {
               >
                 {/* Animated step content */}
                 <div
-                  className={`transition-all duration-300 ease-out ${
-                    stepVisible
-                      ? "translate-x-0 opacity-100"
-                      : "translate-x-4 opacity-0"
-                  }`}
+                  className={`transition-all duration-300 ease-out ${stepVisible
+                    ? "translate-x-0 opacity-100"
+                    : "translate-x-4 opacity-0"
+                    }`}
                 >
                   {/* STEP 1: Account details */}
                   {signupStep === 1 && (
@@ -629,9 +636,9 @@ export default function EnterpriseAuth() {
                           }
                           required
                         >
-                          <option value="type1">Retail</option>
-                          <option value="type2">Wholesale</option>
-                          <option value="type3">Other</option>
+                          <option value="type1">Type-1 No Delivery</option>
+                          <option value="type2">Type-2 Local Delivery</option>
+                          <option value="type3">Type-3 Global Delivery</option>
                         </select>
                       </label>
 
@@ -783,11 +790,14 @@ export default function EnterpriseAuth() {
                           </label>
                         </div>
 
-                        <p className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 px-3.5 py-3 text-xs leading-5 text-emerald-800">
-                          Your device coordinates will be detected
-                          automatically when you create your account. Your
-                          browser may ask for location permission.
-                        </p>
+                       <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-emerald-100 bg-emerald-50 px-3.5 py-3 text-xs leading-5 text-emerald-800">
+  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+
+  <p>
+    Your device coordinates will be detected automatically when you create
+    your account. Your browser may ask for location permission.
+  </p>
+</div>
                       </div>
                     </div>
                   )}
@@ -804,36 +814,38 @@ export default function EnterpriseAuth() {
                           Choose the payment methods your business supports.
                         </p>
 
+
                         <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                          {["Online", "COD", "COT"].map((paymentType) => {
-                            const checked =
-                              signup.paymentTypes.includes(paymentType);
+                          {[
+                            { value: "prepaid_online", label: "Prepaid Online" },
+                            { value: "cash_on_takeaway", label: "Cash on Takeaway" },
+                            { value: "cash_on_delivery", label: "Cash on Delivery" },
+                          ].map(({ value, label }) => {
+                            const checked = signup.paymentTypes.includes(value);
 
                             return (
                               <label
-                                key={paymentType}
-                                className={`flex cursor-pointer items-center gap-2.5 rounded-xl border px-3 py-3 text-sm font-semibold transition ${
-                                  checked
-                                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                    : "border-slate-200 text-slate-600 hover:bg-slate-50"
-                                }`}
+                                key={value}
+                                className={`flex cursor-pointer items-center gap-2.5 rounded-xl border px-3 py-3 text-sm font-semibold transition ${checked
+                                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                  : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                                  }`}
                               >
                                 <input
                                   type="checkbox"
                                   className="h-4 w-4 accent-emerald-600"
                                   checked={checked}
                                   onChange={(event) =>
-                                    togglePaymentType(
-                                      paymentType,
-                                      event.target.checked
-                                    )
+                                    togglePaymentType(value, event.target.checked)
                                   }
                                 />
-                                {paymentType}
+
+                                {label}
                               </label>
                             );
                           })}
                         </div>
+
                       </div>
 
                       <div className="rounded-2xl border border-slate-200 p-4 sm:p-5">
@@ -913,6 +925,7 @@ export default function EnterpriseAuth() {
                     <button
                       className={`${primaryButtonClass} flex-1`}
                       type="submit"
+                      // onClick={continueSignup}
                       disabled={loading}
                     >
                       {loading ? "Creating account..." : "Create account"}

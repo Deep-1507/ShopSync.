@@ -497,8 +497,9 @@ export default function EnterpriseShell({ children }) {
                 <Link
                   href="/enterprise/profile"
                   onClick={() => setProfileOpen(false)}
-                  className="block rounded-lg px-3 py-2 text-[13px] font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-700"
                 >
+                  <UserRound size={15} />
                   View profile
                 </Link>
 

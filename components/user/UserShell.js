@@ -149,7 +149,7 @@ export default function UserShell({ children }) {
     }
 
     if (item.label === "Order History") {
-      return pathname?.startsWith("/user/orders");
+      return pathname?.startsWith("/user/orders/manageOrder");
     }
 
     return pathname === item.href;
@@ -418,7 +418,10 @@ export default function UserShell({ children }) {
               <span className="text-slate-300">/</span>
 
               <span className="truncate font-bold capitalize text-slate-900">
-                {pathname?.split("/").filter(Boolean).at(-1) || "dashboard"}
+                {navItems
+                  .flatMap((item) => [item, ...(item.children || [])])
+                  .find((item) => item.href === pathname)?.label || "Create Order"}
+                  //this is temp fix we need to find solution asap
               </span>
             </div>
           </div>
@@ -479,8 +482,9 @@ export default function UserShell({ children }) {
                 <Link
                   href="/user/profile"
                   onClick={() => setProfileOpen(false)}
-                  className="block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-blue-50 hover:text-blue-700"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-slate-600 transition hover:bg-blue-50 hover:text-blue-700"
                 >
+                  <UserRound size={15} />
                   View profile
                 </Link>
 

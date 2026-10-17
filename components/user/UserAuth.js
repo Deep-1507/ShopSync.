@@ -8,6 +8,7 @@ import {
   USER_ID,
 } from "../../lib/userClient";
 import indiaData from "../../lib/indiaStatesDistricts.json";
+import { MapPin } from "lucide-react";
 
 const initialSignup = {
   name: "",
@@ -107,7 +108,7 @@ export default function UserAuth() {
           reject(
             new Error(
               messages[geoError.code] ||
-                "Unable to detect your location. Please try again."
+              "Unable to detect your location. Please try again."
             )
           );
         },
@@ -139,24 +140,24 @@ export default function UserAuth() {
 
       const body = isSignup
         ? {
-            ...signup,
-            name: signup.name.trim(),
-            email: signup.email.trim(),
-            phone: signup.phone.trim(),
-            location: {
-              addressLine: signup.location.addressLine.trim(),
-              district: signup.location.district.trim(),
-              state: signup.location.state.trim(),
-              pinCode: signup.location.pinCode.trim(),
-              landmark: signup.location.landmark.trim(),
-            },
-            latitude: coordinates.latitude,
-            longitude: coordinates.longitude,
-          }
+          ...signup,
+          name: signup.name.trim(),
+          email: signup.email.trim(),
+          phone: signup.phone.trim(),
+          location: {
+            addressLine: signup.location.addressLine.trim(),
+            district: signup.location.district.trim(),
+            state: signup.location.state.trim(),
+            pinCode: signup.location.pinCode.trim(),
+            landmark: signup.location.landmark.trim(),
+          },
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude,
+        }
         : {
-            ...signin,
-            email: signin.email.trim(),
-          };
+          ...signin,
+          email: signin.email.trim(),
+        };
 
       const response = await fetch(
         isSignup
@@ -377,21 +378,19 @@ export default function UserAuth() {
             {/* Persistent Sign in / Sign up switch */}
             <div className="relative mb-7 grid grid-cols-2 rounded-xl bg-slate-100 p-1">
               <span
-                className={`absolute bottom-1 top-1 w-[calc(50%-4px)] rounded-lg bg-white shadow-sm transition-transform duration-300 ${
-                  mode === "signup"
+                className={`absolute bottom-1 top-1 w-[calc(50%-4px)] rounded-lg bg-white shadow-sm transition-transform duration-300 ${mode === "signup"
                     ? "translate-x-full"
                     : "translate-x-0"
-                }`}
+                  }`}
               />
 
               <button
                 type="button"
                 onClick={() => changeMode("signin")}
-                className={`relative z-10 rounded-lg px-4 py-3 text-sm font-bold transition ${
-                  mode === "signin"
+                className={`relative z-10 rounded-lg px-4 py-3 text-sm font-bold transition ${mode === "signin"
                     ? "text-blue-700"
                     : "text-slate-500 hover:text-slate-800"
-                }`}
+                  }`}
               >
                 Sign in
               </button>
@@ -399,11 +398,10 @@ export default function UserAuth() {
               <button
                 type="button"
                 onClick={() => changeMode("signup")}
-                className={`relative z-10 rounded-lg px-4 py-3 text-sm font-bold transition ${
-                  mode === "signup"
+                className={`relative z-10 rounded-lg px-4 py-3 text-sm font-bold transition ${mode === "signup"
                     ? "text-blue-700"
                     : "text-slate-500 hover:text-slate-800"
-                }`}
+                  }`}
               >
                 Sign up
               </button>
@@ -509,13 +507,12 @@ export default function UserAuth() {
                       {signupSteps.map((step) => (
                         <span
                           key={step.number}
-                          className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
-                            signupStep === step.number
+                          className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${signupStep === step.number
                               ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
                               : signupStep > step.number
                                 ? "bg-blue-100 text-blue-700"
                                 : "bg-slate-100 text-slate-400"
-                          }`}
+                            }`}
                         >
                           {signupStep > step.number
                             ? "✓"
@@ -541,11 +538,10 @@ export default function UserAuth() {
                 >
                   {/* Animated step content */}
                   <div
-                    className={`transition-all duration-300 ease-out ${
-                      stepVisible
+                    className={`transition-all duration-300 ease-out ${stepVisible
                         ? "translate-x-0 opacity-100"
                         : "translate-x-4 opacity-0"
-                    }`}
+                      }`}
                   >
                     {/* STEP 1: Account details */}
                     {signupStep === 1 && (
@@ -759,11 +755,12 @@ export default function UserAuth() {
                           </div>
                         </div>
 
-                        <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
-                          <p className="text-xs leading-5 text-blue-800">
-                            Your device coordinates will be detected
-                            automatically when you create your account.
-                            Your browser may ask for location permission.
+                        <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-blue-100 bg-blue-50 px-3.5 py-3 text-xs leading-5 text-blue-800">
+                          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+
+                          <p>
+                            Your device coordinates will be detected automatically when you create
+                            your account. Your browser may ask for location permission.
                           </p>
                         </div>
                       </div>

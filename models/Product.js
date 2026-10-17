@@ -86,7 +86,7 @@ const productSchema = new mongoose.Schema(
 );
 
 // Prevent duplicate SKUs.
-productSchema.index({ sku: 1 }, { unique: true });
+// productSchema.index({ sku: 1 }, { unique: true });
 
 const Product =
   mongoose.models.Product ||
