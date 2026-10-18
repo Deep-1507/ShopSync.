@@ -53,7 +53,7 @@ function formatDate(value) {
   return date.toLocaleDateString("en-IN");
 }
 
-export default function EnterpriseDashboard() {
+export default function UserDashboard() {
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -92,6 +92,652 @@ export default function EnterpriseDashboard() {
       cancelled = true;
     };
   }, []);
+
+
+const generateUserReport = () => {
+  const reportWindow = window.open("", "_blank");
+
+  if (!reportWindow) {
+    alert("Please allow pop-ups to generate your report.");
+    return;
+  }
+
+  const escapeHtml = (value) =>
+    String(value ?? "—").replace(/[&<>"']/g, (char) => {
+      const entities = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      };
+
+      return entities[char];
+    });
+
+  // Calculate report metrics
+  const cancelledOrders = orders.filter(
+    (order) =>
+      String(order?.orderStatus ?? "").toLowerCase() === "cancelled"
+  );
+
+  const completedValue = orders
+    .filter(
+      (order) =>
+        String(order?.orderStatus ?? "").toLowerCase() !== "cancelled"
+    )
+    .reduce(
+      (total, order) => total + (Number(order?.grandTotal) || 0),
+      0
+    );
+
+  // Summarize order and payment statuses
+  const orderStatusSummary = {};
+  const paymentStatusSummary = {};
+
+  orders.forEach((order) => {
+    const orderStatus = String(order?.orderStatus || "placed").toLowerCase();
+    const paymentStatus = String(
+      order?.paymentStatus || "pending"
+    ).toLowerCase();
+
+    orderStatusSummary[orderStatus] =
+      (orderStatusSummary[orderStatus] || 0) + 1;
+
+    paymentStatusSummary[paymentStatus] =
+      (paymentStatusSummary[paymentStatus] || 0) + 1;
+  });
+
+  // Generate summary table rows
+  const summaryRows = (summary) =>
+    Object.entries(summary)
+      .map(
+        ([status, count]) => `
+          <tr>
+            <td>${escapeHtml(status)}</td>
+            <td>${count}</td>
+          </tr>
+        `
+      )
+      .join("");
+
+  // Generate order history rows
+  const orderRows = [...orders]
+    .sort(
+      (a, b) =>
+        new Date(b?.createdAt || b?.billDate || 0).getTime() -
+        new Date(a?.createdAt || a?.billDate || 0).getTime()
+    )
+    .map(
+      (order) => `
+        <tr>
+          <td>${escapeHtml(order?.billNumber)}</td>
+          <td>${escapeHtml(
+            formatDate(order?.createdAt || order?.billDate)
+          )}</td>
+          <td>${escapeHtml(order?.orderStatus || "placed")}</td>
+          <td>${escapeHtml(order?.paymentStatus || "pending")}</td>
+          <td class="amount">${escapeHtml(money(order?.grandTotal))}</td>
+        </tr>
+      `
+    )
+    .join("");
+
+  // Generate order activity table rows
+  const activityRows = chart
+    .map(
+      (item) => `
+        <tr>
+          <td>${escapeHtml(item.label)}</td>
+          <td>${item.count}</td>
+        </tr>
+      `
+    )
+    .join("");
+
+  // Prepare chart data
+  const statusChartData = Object.entries(orderStatusSummary);
+  const paymentChartData = Object.entries(paymentStatusSummary);
+
+  // Generate horizontal bar charts
+  const makeBarChart = (items, barColor) => {
+    if (!items.length) {
+      return `<p class="muted">No data available for this chart.</p>`;
+    }
+
+    const maxValue = Math.max(...items.map(([, count]) => count), 1);
+
+    return `
+      <div class="chart">
+        ${items
+          .map(
+            ([label, count]) => `
+              <div class="chart-row">
+                <span class="chart-label">${escapeHtml(label)}</span>
+
+                <div class="chart-track">
+                  <div
+                    class="chart-bar"
+                    style="width:${(count / maxValue) * 100}%;background:${barColor}"
+                  ></div>
+                </div>
+
+                <strong class="chart-value">${count}</strong>
+              </div>
+            `
+          )
+          .join("")}
+      </div>
+    `;
+  };
+
+  // Prepare the six-period activity graph
+  const activityMax = Math.max(
+    ...chart.map((item) => item.count),
+    1
+  );
+
+  const activityChart = chart
+    .map(
+      (item) => `
+        <div class="activity-column">
+          <strong>${item.count}</strong>
+
+          <div class="activity-track">
+            <div
+              class="activity-bar"
+              style="height:${
+                item.count > 0
+                  ? Math.max(3, (item.count / activityMax) * 100)
+                  : 0
+              }%"
+            ></div>
+          </div>
+
+          <span>${escapeHtml(item.label)}</span>
+        </div>
+      `
+    )
+    .join("");
+
+  const generatedAt = new Date().toLocaleString("en-IN");
+
+  const reportHtml = `
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+        />
+
+        <title>ShopSync User Report</title>
+
+        <style>
+          * {
+            box-sizing: border-box;
+          }
+
+          body {
+            margin: 0;
+            padding: 32px;
+            color: #0f172a;
+            background: #f8fafc;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 13px;
+          }
+
+          .report {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 32px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+          }
+
+          .header {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding-bottom: 22px;
+            border-bottom: 2px solid #2563eb;
+          }
+
+          .brand {
+            color: #2563eb;
+            font-size: 27px;
+            font-weight: 800;
+          }
+
+          h1 {
+            margin: 8px 0;
+            font-size: 24px;
+          }
+
+          h2 {
+            margin: 28px 0 12px;
+            font-size: 17px;
+            break-after: avoid;
+          }
+
+          .muted {
+            color: #64748b;
+            line-height: 1.7;
+          }
+
+          .cards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 22px;
+          }
+
+          .card {
+            min-width: 0;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+          }
+
+          .card span {
+            display: block;
+            margin-bottom: 10px;
+            color: #64748b;
+          }
+
+          .card strong {
+            font-size: 21px;
+            overflow-wrap: anywhere;
+          }
+
+          /* Horizontal bar charts */
+          .chart {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 18px;
+          }
+
+          .chart-row {
+            display: grid;
+            grid-template-columns: 110px minmax(0, 1fr) 32px;
+            align-items: center;
+            gap: 12px;
+          }
+
+          .chart-label {
+            overflow-wrap: anywhere;
+            color: #475569;
+            text-transform: capitalize;
+          }
+
+          .chart-track {
+            height: 18px;
+            overflow: hidden;
+            background: #eff6ff;
+            border-radius: 5px;
+          }
+
+          .chart-bar {
+            height: 100%;
+            border-radius: 5px;
+          }
+
+          .chart-value {
+            text-align: right;
+            color: #334155;
+          }
+
+          /* Order activity column chart */
+          .activity-chart {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            align-items: end;
+            gap: 14px;
+            height: 230px;
+            margin-top: 20px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+          }
+
+          .activity-column {
+            display: flex;
+            height: 100%;
+            min-width: 0;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            color: #475569;
+            font-size: 11px;
+          }
+
+          .activity-track {
+            display: flex;
+            width: 100%;
+            height: 150px;
+            align-items: flex-end;
+            overflow: hidden;
+            border-radius: 5px 5px 0 0;
+            background: #eff6ff;
+          }
+
+          .activity-bar {
+            width: 100%;
+            min-height: 0;
+            border-radius: 5px 5px 0 0;
+            background: #2563eb;
+          }
+
+          .activity-column span {
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            text-align: center;
+            font-size: 10px;
+          }
+
+          /* Tables */
+          .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+          }
+
+          th,
+          td {
+            padding: 11px 9px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            overflow-wrap: anywhere;
+          }
+
+          th {
+            background: #eff6ff;
+            color: #1e40af;
+          }
+
+          .amount {
+            text-align: right;
+            white-space: nowrap;
+          }
+
+          .actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+          }
+
+          button {
+            padding: 11px 18px;
+            color: white;
+            background: #2563eb;
+            border: 0;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+          }
+
+          @media (max-width: 600px) {
+            body {
+              padding: 10px;
+            }
+
+            .report {
+              padding: 16px;
+            }
+
+            .cards {
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .header {
+              flex-direction: column;
+            }
+
+            .activity-chart {
+              gap: 6px;
+            }
+
+            .chart-row {
+              grid-template-columns: 80px minmax(0, 1fr) 24px;
+              gap: 7px;
+            }
+
+            table {
+              min-width: 600px;
+            }
+          }
+
+          @media print {
+            @page {
+              size: A4;
+              margin: 14mm;
+            }
+
+            body {
+              padding: 0;
+              background: white;
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
+
+            .report {
+              max-width: none;
+              padding: 0;
+              border: 0;
+              border-radius: 0;
+            }
+
+            .actions {
+              display: none;
+            }
+
+            .chart,
+            .activity-chart,
+            .cards {
+              break-inside: avoid;
+            }
+
+            tr {
+              break-inside: avoid;
+            }
+          }
+        </style>
+      </head>
+
+      <body>
+        <main class="report">
+          <div class="actions">
+            <button onclick="window.print()">
+              Print / Save as PDF
+            </button>
+          </div>
+
+          <header class="header">
+            <div>
+              <div class="brand">ShopSync</div>
+              <h1>User Activity Report</h1>
+
+              <div class="muted">
+                Account: ${escapeHtml(user?.name || "User")}<br />
+                Location: ${escapeHtml(formatLocation(user?.location))}<br />
+                Generated: ${escapeHtml(generatedAt)}
+              </div>
+            </div>
+
+            <div class="muted">
+              Report type: Account and order activity<br />
+              Currency: Indian Rupee (INR)
+            </div>
+          </header>
+
+          <!-- Summary cards -->
+          <section class="cards">
+            <div class="card">
+              <span>Total orders / bills</span>
+              <strong>${stats.orders.toLocaleString("en-IN")}</strong>
+            </div>
+
+            <div class="card">
+              <span>Orders today</span>
+              <strong>${stats.today.toLocaleString("en-IN")}</strong>
+            </div>
+
+            <div class="card">
+              <span>Order value excluding cancellations</span>
+              <strong>${escapeHtml(money(completedValue))}</strong>
+            </div>
+
+            <div class="card">
+              <span>Cancelled orders</span>
+              <strong>${cancelledOrders.length.toLocaleString("en-IN")}</strong>
+            </div>
+
+            <div class="card">
+              <span>Other orders</span>
+              <strong>${(
+                orders.length - cancelledOrders.length
+              ).toLocaleString("en-IN")}</strong>
+            </div>
+
+            <div class="card">
+              <span>Activity periods</span>
+              <strong>${chart.length}</strong>
+            </div>
+          </section>
+
+          <!-- Graph 1: Order activity -->
+          <h2>Order activity graph — last 30 days</h2>
+
+          <div class="activity-chart">
+            ${activityChart}
+          </div>
+
+          <p class="muted">
+            Each bar represents the number of orders recorded in a five-day
+            period. The graph uses the activity data calculated by your dashboard.
+          </p>
+
+          <!-- Graph 2: Order status -->
+          <h2>Order status distribution</h2>
+
+          ${makeBarChart(statusChartData, "#2563eb")}
+
+          <!-- Graph 3: Payment status -->
+          <h2>Payment status distribution</h2>
+
+          ${makeBarChart(paymentChartData, "#059669")}
+
+          <!-- Activity data table -->
+          <h2>Order activity details</h2>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Five-day period</th>
+                  <th>Number of orders</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                ${
+                  activityRows ||
+                  "<tr><td colspan='2'>No activity data available.</td></tr>"
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Order status summary -->
+          <h2>Order status summary</h2>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Order status</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                ${
+                  summaryRows(orderStatusSummary) ||
+                  "<tr><td colspan='2'>No orders found.</td></tr>"
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Payment status summary -->
+          <h2>Payment status summary</h2>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Payment status</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                ${
+                  summaryRows(paymentStatusSummary) ||
+                  "<tr><td colspan='2'>No orders found.</td></tr>"
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Order history -->
+          <h2>Order history</h2>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Bill number</th>
+                  <th>Date</th>
+                  <th>Order status</th>
+                  <th>Payment status</th>
+                  <th class="amount">Amount</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                ${
+                  orderRows ||
+                  "<tr><td colspan='5'>No orders found.</td></tr>"
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <p class="muted" style="margin-top:24px">
+            This report is based on the order data currently loaded in your
+            ShopSync dashboard. Order value excludes cancelled orders and is
+            not necessarily the same as settled payments.
+          </p>
+        </main>
+      </body>
+    </html>
+  `;
+
+  reportWindow.document.open();
+  reportWindow.document.write(reportHtml);
+  reportWindow.document.close();
+};
+
+
 
   const stats = useMemo(() => {
     const today = new Date();
@@ -202,8 +848,10 @@ export default function EnterpriseDashboard() {
   return (
     <div className="flex w-full flex-col gap-6 bg-slate-50/70 p-4 sm:p-6 lg:p-8">
       {/* Dashboard heading */}
+
+      {/* Dashboard heading */}
       <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
+        <div className="min-w-0">
           <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600">
             Your account at a glance
           </span>
@@ -216,7 +864,17 @@ export default function EnterpriseDashboard() {
             Here&apos;s what&apos;s happening.......
           </p>
         </div>
+
+        <button
+          type="button"
+          onClick={generateUserReport}
+          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 shadow-sm transition hover:bg-blue-50 sm:self-center"
+        >
+          <span aria-hidden="true">▤</span>
+          Generate Report
+        </button>
       </section>
+
 
       {/* Error notice */}
       {error && (
@@ -371,14 +1029,13 @@ export default function EnterpriseDashboard() {
                   <div
                     className="w-full max-w-10 rounded-t-md bg-blue-600 transition-all duration-300 hover:bg-blue-700"
                     style={{
-                      height: `${
-                        item.count > 0
-                          ? Math.max(
-                              8,
-                              (item.count / maxCount) * 100
-                            )
-                          : 0
-                      }%`,
+                      height: `${item.count > 0
+                        ? Math.max(
+                          8,
+                          (item.count / maxCount) * 100
+                        )
+                        : 0
+                        }%`,
                     }}
                   />
                 </div>

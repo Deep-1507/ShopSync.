@@ -68,6 +68,739 @@ export default function EnterpriseDashboard() {
     setTodayDate(new Date());
   }, []);
 
+
+const generateEnterpriseReport = () => {
+  const popup = window.open("", "_blank");
+
+  if (!popup) {
+    alert("Please allow pop-ups for ShopSync to generate your report.");
+    return;
+  }
+
+  const businessName =
+    enterprise?.enterpriseName || enterprise?.name || "Enterprise";
+
+  const reportDate = new Date().toLocaleString("en-IN");
+
+  const escapeHtml = (value) =>
+    String(value ?? "—").replace(/[&<>"']/g, (character) => {
+      const entities = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      };
+
+      return entities[character];
+    });
+
+  const formatDate = (value) => {
+    if (!value) return "—";
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime())
+      ? "—"
+      : date.toLocaleDateString("en-IN");
+  };
+
+  // Inventory summaries
+  const lowStockProducts = products.filter((product) => {
+    const stock = Number(product?.stock);
+    return stock > 0 && stock <= 10;
+  });
+
+  const outOfStockProducts = products.filter(
+    (product) => Number(product?.stock) <= 0
+  );
+
+  // Order summaries
+  const cancelledOrders = orders.filter(
+    (order) =>
+      String(order?.orderStatus || "").toLowerCase() === "cancelled"
+  );
+
+  const validOrders = orders.filter(
+    (order) =>
+      String(order?.orderStatus || "").toLowerCase() !== "cancelled"
+  );
+
+  const totalRevenue = validOrders.reduce(
+    (sum, order) => sum + (Number(order?.grandTotal) || 0),
+    0
+  );
+
+  const pendingPayments = orders.filter((order) =>
+    ["pending", "unpaid"].includes(
+      String(order?.paymentStatus || "").toLowerCase()
+    )
+  );
+
+  const orderStatusCounts = {};
+  const paymentStatusCounts = {};
+
+  orders.forEach((order) => {
+    const orderStatus = String(order?.orderStatus || "unknown").toLowerCase();
+    const paymentStatus = String(
+      order?.paymentStatus || "unknown"
+    ).toLowerCase();
+
+    orderStatusCounts[orderStatus] =
+      (orderStatusCounts[orderStatus] || 0) + 1;
+
+    paymentStatusCounts[paymentStatus] =
+      (paymentStatusCounts[paymentStatus] || 0) + 1;
+  });
+
+  // Inventory category distribution
+  const categoryCounts = {};
+
+  products.forEach((product) => {
+    const category = String(product?.category || "uncategorized");
+    categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+  });
+
+  // Table rows
+  const statusRows = (statusMap) =>
+    Object.entries(statusMap)
+      .map(
+        ([status, count]) => `
+          <tr>
+            <td>${escapeHtml(status)}</td>
+            <td class="number">${count}</td>
+          </tr>
+        `
+      )
+      .join("");
+
+  const productRows = [...products]
+    .sort((a, b) =>
+      String(a?.name || "").localeCompare(String(b?.name || ""))
+    )
+    .map(
+      (product, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${escapeHtml(product?.name)}</td>
+          <td>${escapeHtml(product?.sku)}</td>
+          <td>${escapeHtml(product?.category)}</td>
+          <td>${escapeHtml(product?.brand)}</td>
+          <td class="number">${escapeHtml(product?.stock ?? 0)}</td>
+          <td class="number">${escapeHtml(money(product?.price))}</td>
+          <td>
+            ${
+              Number(product?.stock) <= 0
+                ? "Out of stock"
+                : Number(product?.stock) <= 10
+                  ? "Low stock"
+                  : "In stock"
+            }
+          </td>
+        </tr>
+      `
+    )
+    .join("");
+
+  const orderRows = [...orders]
+    .sort(
+      (a, b) =>
+        new Date(b?.createdAt || b?.billDate || 0).getTime() -
+        new Date(a?.createdAt || a?.billDate || 0).getTime()
+    )
+    .map(
+      (order, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${escapeHtml(order?.billNumber || order?._id)}</td>
+          <td>${formatDate(order?.createdAt || order?.billDate)}</td>
+          <td>${escapeHtml(order?.orderStatus || "placed")}</td>
+          <td>${escapeHtml(order?.paymentStatus || "pending")}</td>
+          <td class="number">${escapeHtml(money(order?.grandTotal))}</td>
+        </tr>
+      `
+    )
+    .join("");
+
+  // Reusable horizontal bar graph
+  const makeBarChart = (data, color) => {
+    const entries = Object.entries(data);
+
+    if (!entries.length) {
+      return `<p class="empty">No data available for this graph.</p>`;
+    }
+
+    const maxValue = Math.max(...entries.map(([, count]) => count), 1);
+
+    return `
+      <div class="bar-chart">
+        ${entries
+          .sort((a, b) => b[1] - a[1])
+          .map(
+            ([label, count]) => `
+              <div class="bar-row">
+                <span class="bar-label">${escapeHtml(label)}</span>
+                <div class="bar-track">
+                  <div
+                    class="bar-fill"
+                    style="width:${(count / maxValue) * 100}%;background:${color}"
+                  ></div>
+                </div>
+                <strong class="bar-value">${count}</strong>
+              </div>
+            `
+          )
+          .join("")}
+      </div>
+    `;
+  };
+
+  // Six five-day order activity periods from the dashboard
+  const activityMax = Math.max(
+    ...chart.map((item) => item.count),
+    1
+  );
+
+  const activityGraph = chart
+    .map(
+      (item) => `
+        <div class="activity-column">
+          <strong>${item.count}</strong>
+          <div class="activity-track">
+            <div
+              class="activity-fill"
+              style="height:${
+                item.count > 0
+                  ? Math.max(3, (item.count / activityMax) * 100)
+                  : 0
+              }%;"
+            ></div>
+          </div>
+          <span>${escapeHtml(item.label)}</span>
+        </div>
+      `
+    )
+    .join("");
+
+  // Inventory stock graph: in stock, low stock, out of stock
+  const stockCounts = {
+    "In stock": products.filter((product) => Number(product?.stock) > 10)
+      .length,
+    "Low stock": lowStockProducts.length,
+    "Out of stock": outOfStockProducts.length,
+  };
+
+  popup.document.open();
+  popup.document.write(`
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>${escapeHtml(businessName)} - ShopSync Enterprise Report</title>
+
+        <style>
+          * {
+            box-sizing: border-box;
+          }
+
+          body {
+            margin: 0;
+            padding: 28px;
+            color: #172033;
+            background: #f8fafc;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+          }
+
+          .report {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+          }
+
+          .header {
+            padding-bottom: 20px;
+            border-bottom: 3px solid #059669;
+          }
+
+          .brand {
+            color: #059669;
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+          }
+
+          h1 {
+            margin: 8px 0;
+            font-size: 28px;
+          }
+
+          h2 {
+            margin: 30px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #d1fae5;
+            font-size: 17px;
+            break-after: avoid;
+          }
+
+          p {
+            color: #64748b;
+            line-height: 1.7;
+          }
+
+          .info {
+            line-height: 1.9;
+            overflow-wrap: anywhere;
+          }
+
+          .metrics {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 22px;
+          }
+
+          .metric {
+            min-width: 0;
+            padding: 16px;
+            border: 1px solid #dbe3ea;
+            border-radius: 10px;
+          }
+
+          .metric span {
+            display: block;
+            color: #64748b;
+            font-size: 11px;
+          }
+
+          .metric strong {
+            display: block;
+            margin-top: 9px;
+            font-size: 21px;
+            overflow-wrap: anywhere;
+          }
+
+          .muted {
+            color: #64748b;
+          }
+
+          /* Order activity column chart */
+          .activity-chart {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 16px;
+            align-items: end;
+            height: 230px;
+            margin-top: 20px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+          }
+
+          .activity-column {
+            display: flex;
+            min-width: 0;
+            height: 100%;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            color: #475569;
+          }
+
+          .activity-track {
+            display: flex;
+            width: 100%;
+            max-width: 60px;
+            height: 150px;
+            align-items: flex-end;
+            overflow: hidden;
+            border-radius: 5px 5px 0 0;
+            background: #ecfdf5;
+          }
+
+          .activity-fill {
+            width: 100%;
+            background: #059669;
+            border-radius: 5px 5px 0 0;
+          }
+
+          .activity-column span {
+            font-size: 10px;
+            text-align: center;
+            overflow-wrap: anywhere;
+          }
+
+          /* Horizontal graphs */
+          .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 18px 0;
+          }
+
+          .bar-row {
+            display: grid;
+            grid-template-columns: 130px minmax(0, 1fr) 35px;
+            align-items: center;
+            gap: 12px;
+          }
+
+          .bar-label {
+            color: #475569;
+            text-transform: capitalize;
+            overflow-wrap: anywhere;
+          }
+
+          .bar-track {
+            height: 19px;
+            overflow: hidden;
+            border-radius: 5px;
+            background: #ecfdf5;
+          }
+
+          .bar-fill {
+            height: 100%;
+            min-width: 0;
+            border-radius: 5px;
+          }
+
+          .bar-value {
+            text-align: right;
+          }
+
+          /* Tables */
+          .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+          }
+
+          table {
+            width: 100%;
+            margin-top: 12px;
+            border-collapse: collapse;
+          }
+
+          th,
+          td {
+            padding: 9px;
+            border: 1px solid #dbe3ea;
+            text-align: left;
+            overflow-wrap: anywhere;
+          }
+
+          th {
+            color: #065f46;
+            background: #ecfdf5;
+          }
+
+          .number {
+            text-align: right;
+          }
+
+          .empty {
+            color: #64748b;
+            font-style: italic;
+          }
+
+          .print-button {
+            margin-bottom: 22px;
+            padding: 11px 18px;
+            border: 0;
+            border-radius: 8px;
+            background: #059669;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+          }
+
+          .footer {
+            margin-top: 30px;
+            padding-top: 12px;
+            border-top: 1px solid #dbe3ea;
+            color: #64748b;
+            line-height: 1.7;
+          }
+
+          @page {
+            size: A4 landscape;
+            margin: 12mm;
+          }
+
+          @media (max-width: 700px) {
+            body {
+              padding: 10px;
+            }
+
+            .report {
+              padding: 16px;
+            }
+
+            .metrics {
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .bar-row {
+              grid-template-columns: 85px minmax(0, 1fr) 25px;
+              gap: 7px;
+            }
+
+            .activity-chart {
+              gap: 6px;
+            }
+          }
+
+          @media print {
+            body {
+              padding: 0;
+              background: #fff;
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
+
+            .report {
+              max-width: none;
+              padding: 0;
+              border: 0;
+              border-radius: 0;
+            }
+
+            .print-button {
+              display: none;
+            }
+
+            h2 {
+              break-after: avoid;
+            }
+
+            .metrics,
+            .activity-chart,
+            .bar-chart {
+              break-inside: avoid;
+            }
+
+            tr {
+              break-inside: avoid;
+            }
+          }
+        </style>
+      </head>
+
+      <body>
+        <main class="report">
+          <button class="print-button" onclick="window.print()">
+            Print / Save as PDF
+          </button>
+
+          <header class="header">
+            <div class="brand">ShopSync Enterprise</div>
+            <h1>${escapeHtml(businessName)}</h1>
+            <p>Enterprise Business and Inventory Report</p>
+
+            <div class="info">
+              <strong>Business category:</strong>
+              ${escapeHtml(enterprise?.category || "—")}<br />
+
+              <strong>Report generated:</strong>
+              ${escapeHtml(reportDate)}<br />
+
+              <strong>Report coverage:</strong>
+              All records currently loaded by the connected enterprise APIs.
+            </div>
+          </header>
+
+          <h2>1. Executive Summary</h2>
+
+          <section class="metrics">
+            <div class="metric">
+              <span>Registered Products</span>
+              <strong>${products.length.toLocaleString("en-IN")}</strong>
+            </div>
+
+            <div class="metric">
+              <span>Total Orders / Bills</span>
+              <strong>${orders.length.toLocaleString("en-IN")}</strong>
+            </div>
+
+            <div class="metric">
+              <span>Orders Created Today</span>
+              <strong>${stats.today.toLocaleString("en-IN")}</strong>
+            </div>
+
+            <div class="metric">
+              <span>Order Value Excluding Cancellations</span>
+              <strong>${escapeHtml(money(totalRevenue))}</strong>
+            </div>
+          </section>
+
+          <h2>2. Order Activity — Last 30 Days</h2>
+
+          <div class="activity-chart">
+            ${activityGraph}
+          </div>
+
+          <p class="muted">
+            Each bar represents orders recorded in a five-day period.
+          </p>
+
+          <h2>3. Inventory Stock Distribution</h2>
+
+          ${makeBarChart(stockCounts, "#059669")}
+
+          <p class="muted">
+            Low stock means 1–10 units remaining. Out of stock means zero or
+            fewer units.
+          </p>
+
+          <h2>4. Order Status Distribution</h2>
+
+          ${makeBarChart(orderStatusCounts, "#059669")}
+
+          <h2>5. Payment Status Distribution</h2>
+
+          ${makeBarChart(paymentStatusCounts, "#7c3aed")}
+
+          <h2>6. Inventory Report</h2>
+
+          <p>
+            Total products: ${products.length} |
+            Low stock: ${lowStockProducts.length} |
+            Out of stock: ${outOfStockProducts.length}
+          </p>
+
+          ${
+            products.length
+              ? `
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Product</th>
+                        <th>SKU</th>
+                        <th>Category</th>
+                        <th>Brand</th>
+                        <th>Stock</th>
+                        <th>Unit Price</th>
+                        <th>Stock Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>${productRows}</tbody>
+                  </table>
+                </div>
+              `
+              : `<p class="empty">No products found.</p>`
+          }
+
+          <h2>7. Orders and Sales</h2>
+
+          <p>
+            Total orders: ${orders.length} |
+            Non-cancelled orders: ${validOrders.length} |
+            Cancelled orders: ${cancelledOrders.length} |
+            Pending/unpaid payments: ${pendingPayments.length}
+          </p>
+
+          ${
+            orders.length
+              ? `
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Bill / Order ID</th>
+                        <th>Date</th>
+                        <th>Order Status</th>
+                        <th>Payment Status</th>
+                        <th>Order Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>${orderRows}</tbody>
+                  </table>
+                </div>
+              `
+              : `<p class="empty">No orders found.</p>`
+          }
+
+          <h2>8. Order Status Summary</h2>
+
+          ${
+            orders.length
+              ? `
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Order Status</th>
+                        <th>Count</th>
+                      </tr>
+                    </thead>
+                    <tbody>${statusRows(orderStatusCounts)}</tbody>
+                  </table>
+                </div>
+              `
+              : `<p class="empty">No order status data available.</p>`
+          }
+
+          <h2>9. Payment Status Summary</h2>
+
+          ${
+            orders.length
+              ? `
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Payment Status</th>
+                        <th>Count</th>
+                      </tr>
+                    </thead>
+                    <tbody>${statusRows(paymentStatusCounts)}</tbody>
+                  </table>
+                </div>
+              `
+              : `<p class="empty">No payment status data available.</p>`
+          }
+
+          <h2>10. Business Observations</h2>
+
+          <ul>
+            <li>
+              ${lowStockProducts.length} product(s) have between 1 and 10
+              units remaining.
+            </li>
+            <li>
+              ${outOfStockProducts.length} product(s) are out of stock.
+            </li>
+            <li>
+              ${pendingPayments.length} order(s) have a payment status marked
+              pending or unpaid.
+            </li>
+            <li>
+              Order value excludes cancelled orders. It reflects recorded
+              grand totals and is not independently verified payment revenue.
+            </li>
+          </ul>
+
+          <div class="footer">
+            Generated by ShopSync · ${escapeHtml(reportDate)}<br />
+            This report reflects the data returned by the enterprise APIs at
+            the time of generation.
+          </div>
+        </main>
+      </body>
+    </html>
+  `);
+
+  popup.document.close();
+};
+
+
   const stats = useMemo(() => {
     if (!todayDate) {
       return {
@@ -204,6 +937,7 @@ export default function EnterpriseDashboard() {
 
   return (
     <div className="flex w-full flex-col gap-6 bg-slate-50/70 p-4 sm:p-6 lg:p-8">
+
       {/* Dashboard heading */}
       <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div className="min-w-0">
@@ -221,14 +955,26 @@ export default function EnterpriseDashboard() {
           </p>
         </div>
 
-        <Link
-          href="/enterprise/products"
-          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 sm:self-center"
-        >
-          <span className="text-lg leading-none">＋</span>
-          Add product
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={generateEnterpriseReport}
+            className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50"
+          >
+            <span aria-hidden="true">▤</span>
+            Generate Report
+          </button>
+
+          <Link
+            href="/enterprise/products"
+            className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+          >
+            <span className="text-lg leading-none">＋</span>
+            Add product
+          </Link>
+        </div>
       </section>
+
 
       {/* Error message */}
       {error && (
@@ -496,8 +1242,8 @@ export default function EnterpriseDashboard() {
                     <td className="whitespace-nowrap px-5 py-4 text-slate-500">
                       {order.createdAt || order.billDate
                         ? new Date(
-                            order.createdAt || order.billDate
-                          ).toLocaleDateString("en-IN")
+                          order.createdAt || order.billDate
+                        ).toLocaleDateString("en-IN")
                         : "—"}
                     </td>
 

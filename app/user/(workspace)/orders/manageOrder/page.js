@@ -93,6 +93,7 @@ export default function ManageOrdersPage() {
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [ordersToPrint, setOrdersToPrint] = useState([]);
 
     const [editingOrder, setEditingOrder] = useState(null);
     const [editProducts, setEditProducts] = useState([]);
@@ -237,12 +238,25 @@ export default function ManageOrdersPage() {
     );
 
     function printOrder(order) {
-        setSelectedOrder(order);
-        window.setTimeout(() => window.print(), 100);
+        if (!order) return;
+
+        setOrdersToPrint([order]);
+
+        // Wait for the dedicated invoice area to update before printing.
+        window.setTimeout(() => {
+            window.print();
+        }, 200);
     }
 
     function printAll() {
-        window.print();
+        if (!filteredOrders.length) return;
+
+        // Print all bills matching the current filters.
+        setOrdersToPrint([...filteredOrders]);
+
+        window.setTimeout(() => {
+            window.print();
+        }, 200);
     }
 
     function statusClass(value) {
@@ -599,7 +613,7 @@ export default function ManageOrdersPage() {
     function renderBill(order) {
         return (
             <div
-                className="mx-auto my-0 hidden max-w-[800px] bg-white p-8 text-black print:my-0 print:block print:max-w-none print:p-0"
+                className="print-bill mx-auto w-full max-w-[800px] bg-white p-6 text-black sm:p-8"
                 key={order._id || order.billNumber}
             >
                 <div className="flex items-start justify-between gap-5 border-b-2 border-black pb-5 [&_h1]:my-2 [&_h1]:text-3xl [&_h1]:font-bold [&_p]:text-xs">
@@ -963,6 +977,11 @@ export default function ManageOrdersPage() {
                                                 >
                                                     Make Payment
                                                 </button>
+                                            )}
+                                            {String(order.orderStatus || "").toLowerCase() === "completed" && (
+                                                <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
+                                                    <span>✓</span> Verified & Completed
+                                                </span>
                                             )}
                                         </td>
                                         <td>
@@ -1473,11 +1492,10 @@ export default function ManageOrdersPage() {
                 </div>
             )}
 
-            <section className="hidden print:block">
-                {selectedOrder
-                    ? renderBill(selectedOrder)
-                    : filteredOrders.map(renderBill)}
-            </section>
+            {/* Dedicated invoice-only print area */}
+            <div id="bill-print-root" aria-hidden="true">
+                {ordersToPrint.map((order) => renderBill(order))}
+            </div>
 
             {editingOrder && (
                 <div className="fixed inset-0 z-[1050] flex items-center justify-center overflow-y-auto bg-[#10251bd1] p-3 sm:p-5 print:hidden">
@@ -1817,6 +1835,97 @@ export default function ManageOrdersPage() {
                     </section>
                 </div>
             )}
+
+            <style jsx global>{`
+    #bill-print-root {
+        display: none;
+    }
+
+    @page {
+        size: A4;
+        margin: 12mm;
+    }
+
+    @media print {
+        html,
+        body {
+            width: 100% !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+        }
+
+        body * {
+            visibility: hidden !important;
+        }
+
+        #bill-print-root {
+            display: block !important;
+            position: absolute !important;
+            inset: 0 auto auto 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            visibility: visible !important;
+        }
+
+        #bill-print-root,
+        #bill-print-root * {
+            visibility: visible !important;
+        }
+
+        #bill-print-root .print-bill {
+            display: block !important;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            color: #000000 !important;
+            background: #ffffff !important;
+            font-size: 10pt;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            break-after: page;
+            page-break-after: always;
+        }
+
+        #bill-print-root .print-bill:last-child {
+            break-after: auto;
+            page-break-after: auto;
+        }
+
+        #bill-print-root table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+        }
+
+        #bill-print-root thead {
+            display: table-header-group;
+        }
+
+        #bill-print-root tr {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        #bill-print-root th,
+        #bill-print-root td {
+            border: 1px solid #d1d5db !important;
+            padding: 6px !important;
+            color: #000000 !important;
+        }
+
+        #bill-print-root th {
+            background: #f3f4f6 !important;
+        }
+
+        #bill-print-root h1 {
+            font-size: 24pt !important;
+        }
+    }
+`}</style>
         </div>
     );
 }

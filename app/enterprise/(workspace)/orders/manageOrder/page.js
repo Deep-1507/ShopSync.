@@ -109,6 +109,8 @@ export default function ManageOrdersPage() {
   const [dateTo, setDateTo] = useState("");
 
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [ordersToPrint, setOrdersToPrint] = useState([]);
+  const [printRequested, setPrintRequested] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -252,15 +254,17 @@ export default function ManageOrdersPage() {
   );
 
   function printOrder(order) {
-    setSelectedOrder(order);
+    if (!order) return;
 
-    window.setTimeout(() => {
-      window.print();
-    }, 100);
+    setOrdersToPrint([order]);
+    setPrintRequested(true);
   }
 
   function printAll() {
-    window.print();
+    if (!filteredOrders.length) return;
+
+    setOrdersToPrint([...filteredOrders]);
+    setPrintRequested(true);
   }
 
   function clearFilters() {
@@ -270,6 +274,26 @@ export default function ManageOrdersPage() {
     setDateTo("");
     setCurrentPage(1);
   }
+
+  useEffect(() => {
+    if (!printRequested || !ordersToPrint.length) return;
+
+    const handleAfterPrint = () => {
+      setPrintRequested(false);
+      setOrdersToPrint([]);
+    };
+
+    window.addEventListener("afterprint", handleAfterPrint);
+
+    const timer = window.setTimeout(() => {
+      window.print();
+    }, 150);
+
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("afterprint", handleAfterPrint);
+    };
+  }, [printRequested, ordersToPrint]);
 
   function statusClass(value) {
     const v = String(value || "pending").toLowerCase();
@@ -298,7 +322,7 @@ export default function ManageOrdersPage() {
     return (
       <div
         key={order._id || order.billNumber}
-        className="mx-auto my-0 hidden max-w-[800px] bg-white p-8 text-black print:my-0 print:block print:max-w-none print:p-0"
+        className="print-bill mx-auto w-full max-w-[800px] bg-white p-6 text-black sm:p-8"
       >
         <div className="flex items-start justify-between gap-5 border-b-2 border-black pb-5 [&_h1]:my-2 [&_h1]:text-3xl [&_h1]:font-bold [&_p]:text-xs">
           <div>
@@ -1256,12 +1280,10 @@ export default function ManageOrdersPage() {
         </div>
       )}
 
-      {/* Printable invoices */}
-      <section className="hidden print:block">
-        {selectedOrder
-          ? renderBill(selectedOrder)
-          : filteredOrders.map(renderBill)}
-      </section>
+      {/* Dedicated print-only invoice container */}
+      <div id="bill-print-root" aria-hidden="true">
+        {ordersToPrint.map((order) => renderBill(order))}
+      </div>
 
 
       {orderToReview && (
@@ -1844,6 +1866,107 @@ export default function ManageOrdersPage() {
           </section>
         </div>
       )}
+
+
+      <style jsx global>{`
+  #bill-print-root {
+    display: none;
+  }
+
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  @media print {
+    html,
+    body {
+      width: 100% !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #fff !important;
+    }
+
+    body * {
+      visibility: hidden !important;
+    }
+
+    #bill-print-root {
+      display: block !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #fff !important;
+      visibility: visible !important;
+    }
+
+    #bill-print-root,
+    #bill-print-root * {
+      visibility: visible !important;
+    }
+
+    #bill-print-root .print-bill {
+      display: block !important;
+      width: 100% !important;
+      max-width: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      color: #000 !important;
+      background: #fff !important;
+      font-size: 10pt !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      break-after: page;
+      page-break-after: always;
+    }
+
+    #bill-print-root .print-bill:last-child {
+      break-after: auto;
+      page-break-after: auto;
+    }
+
+    #bill-print-root table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+    }
+
+    #bill-print-root thead {
+      display: table-header-group;
+    }
+
+    #bill-print-root tr {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    #bill-print-root th,
+    #bill-print-root td {
+      border: 1px solid #d1d5db !important;
+      padding: 6px !important;
+      color: #000 !important;
+    }
+
+    #bill-print-root th {
+      background: #f3f4f6 !important;
+    }
+
+    #bill-print-root h1 {
+      font-size: 24pt !important;
+    }
+
+    #bill-print-root p,
+    #bill-print-root span,
+    #bill-print-root strong {
+      color: #000;
+    }
+  }
+`}</style>
     </div>
+
+
   );
 }
