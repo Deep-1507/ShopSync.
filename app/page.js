@@ -176,8 +176,9 @@ export default function HomePage() {
       <header className="fixed top-0 inset-x-0 z-50 border-b border-blue-100/70 bg-white/60 backdrop-blur-xl">
         <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-8 sm:py-4 lg:px-12">
           <Link href="/" className="group flex min-w-0 shrink items-center gap-2 sm:gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-xl text-white shadow-lg shadow-blue-200 transition duration-300 group-hover:rotate-6 sm:h-11 sm:w-11 sm:rounded-2xl sm:text-2xl">
-              S
+            <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-blue-400/30 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 text-2xl font-black italic tracking-tight text-white shadow-lg shadow-blue-600/30 ring-1 ring-white/20 transition-all duration-300 group-hover:-rotate-6 group-hover:scale-105 sm:h-11 sm:w-11 sm:rounded-2xl sm:text-3xl">
+              <span className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/25 via-transparent to-transparent sm:rounded-2xl" />
+              <span className="relative drop-shadow-sm">S</span>
             </span>
 
             <span className="whitespace-nowrap text-xl font-black tracking-tight sm:text-2xl">
