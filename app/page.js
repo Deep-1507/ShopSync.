@@ -173,13 +173,14 @@ export default function HomePage() {
       </div>
 
       {/* Navbar */}
-      <header className="fixed top-0 inset-x-0 z-50 border-b border-blue-100/70 bg-white/90 backdrop-blur-xl">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-12">
-          <Link href="/" className="group flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-2xl text-white shadow-lg shadow-blue-200 transition duration-300 group-hover:rotate-6">
-              ✦
+      <header className="fixed top-0 inset-x-0 z-50 border-b border-blue-100/70 bg-white/60 backdrop-blur-xl">
+        <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-8 sm:py-4 lg:px-12">
+          <Link href="/" className="group flex min-w-0 shrink items-center gap-2 sm:gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-xl text-white shadow-lg shadow-blue-200 transition duration-300 group-hover:rotate-6 sm:h-11 sm:w-11 sm:rounded-2xl sm:text-2xl">
+              S
             </span>
-            <span className="text-2xl font-black tracking-tight">
+
+            <span className="whitespace-nowrap text-xl font-black tracking-tight sm:text-2xl">
               Shop<span className="text-blue-600">Sync</span>
             </span>
           </Link>
@@ -199,7 +200,7 @@ export default function HomePage() {
 
           <a
             href="#portals"
-            className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold !text-white shadow-md shadow-blue-200 transition hover:bg-blue-700 sm:px-5"
+            className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-xl bg-blue-600 px-3 py-2.5 text-xs font-bold !text-white shadow-md shadow-blue-200 transition hover:bg-blue-700 sm:px-5 sm:text-sm"
           >
             Get Started <span className="ml-1">→</span>
           </a>
@@ -207,7 +208,7 @@ export default function HomePage() {
       </header>
 
       {/* Hero */}
-      <section className="relative px-5 pb-20 pt-16 sm:px-8 sm:pb-24 sm:pt-24 lg:px-12 lg:pt-28">
+      <section className="relative px-3 pb-16 pt-28 sm:px-8 sm:pb-24 sm:pt-28 lg:px-12 lg:pt-32">
         <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-4xl text-center">
             <div className="inline-flex animate-[fadeInUp_0.7s_ease-out_both] items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-4 py-2 text-sm font-bold text-blue-700 shadow-sm backdrop-blur">
@@ -215,7 +216,7 @@ export default function HomePage() {
               One platform. Two experiences.
             </div>
 
-            <h1 className="mt-8 animate-[fadeInUp_0.8s_ease-out_both] text-4xl font-black leading-[1.08] tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
+            <h1 className="mt-8 w-full break-words text-3xl font-black leading-[1.1] tracking-tight text-slate-950 [overflow-wrap:anywhere] sm:text-6xl lg:text-7xl">
               Bringing business
               <br />
               and shopping
